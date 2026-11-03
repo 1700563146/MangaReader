@@ -172,7 +172,7 @@ class DownloadWorker(
 ### 4.1 本地备份
 
 - 触发：手动 + 可选每日（`WorkManager` 周期任务，`KEEP`）。
-- 打包：流式写 ZIP，内容见 [04 §5](04-data-model.md#5-备份文件格式mangareaderzip)；**不包含**图片、Cookie、WebDAV 密码、图片缓存。
+- 打包：流式写 ZIP，内容见 [04 §6](04-data-model.md#6-备份格式mangareaderzip)；**不包含**图片、Cookie、WebDAV 密码、图片缓存。
 - 位置：`ACTION_CREATE_DOCUMENT` 让用户选择（默认文件名 `mangareader-backup-<yyyyMMdd-HHmm>.zip`）。
 - 保留策略：若保存到私有目录，保留最近 5 份并按天去重。
 - 校验：写完后回读 ZIP 并校验 `manifest.checksum`；失败删除半成品。
