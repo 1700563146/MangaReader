@@ -1,0 +1,60 @@
+# Gradle / Android
+.gradle/
+build/
+*/build/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.DS_Store
+
+# Signing / secrets
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+.env
+.env.*
+*.p12
+*.pem
+!docs/schema/*.json
+
+# Lint / reports
+lint-results*.html
+lint-results*.xml
+reports/
+**/reports/
+detekt-baseline.xml
+spotless-index
+
+# Test / benchmark output
+*/build/outputs/
+benchmark/build/
+*.hprof
+*.trace
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Local scratch
+/tmp/
+/scratch/
+*.local.md

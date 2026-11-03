@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/1700563146/MangaReader/main/docs/schema/source-rule.schema.json",
+  "title": "MangaReader Source Rule",
+  "description": "MangaReader 源规则 v1。结构校验由此 Schema 负责；能力块与 capabilities 的一致性、URL 变量、脚本编译等语义校验由引擎 L2 校验器完成（见 docs/05-source-rule-spec.md）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "name", "version", "minEngine", "baseUrl", "hosts", "capabilities"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{2,64}$",
+      "description": "全局唯一；official.* 前缀保留给官方，社区请使用 community.* 或反向域名。"
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 32 },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$" },
+    "minEngine": { "type": "integer", "minimum": 1 },
+    "baseUrl": { "type": "string", "pattern": "^https?://[^\\s]+$" },
+    "hosts": { "type": "array", "minItems": 1, "maxItems": 10, "items": { "$ref": "#/$defs/host" } },
+    "imageHosts": { "type": "array", "maxItems": 30, "items": { "$ref": "#/$defs/host" } },
+    "allowCleartext": { "type": "boolean", "default": false },
+    "adult": { "type": "boolean", "default": false },
+    "lang": { "type": "string", "default": "zh" },
+    "author": { "type": "string", "maxLength": 64 },
+    "description": { "type": "string", "maxLength": 500 },
+    "homepage": { "type": "string", "pattern": "^https?://[^\\s]+$" },
+    "headers": { "$ref": "#/$defs/headers" },
+    "http": { "$ref": "#/$defs/http" },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["search", "detail", "chapters", "images", "check", "category"] }
+    },
+    "search": { "$ref": "#/$defs/search" },
+    "detail": { "$ref": "#/$defs/detail" },
+    "chapters": { "$ref": "#/$defs/chapters" },
+    "images": { "$ref": "#/$defs/images" },
+    "check": { "$ref": "#/$defs/check" },
+    "category": { "$ref": "#/$defs/category" },
+    "scripts": { "$ref": "#/$defs/scripts" },
+    "config": { "type": "object", "additionalProperties": { "$ref": "#/$defs/configItem" } }
+  },
+  "$defs": {
+    "host": {
+      "type": "string",
+      "pattern": "^(?:\\*\\.)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+    },
+    "headers": {
+      "type": "object",
+      "maxProperties": 20,
+      "additionalProperties": { "type": "string", "maxLength": 512 }
+    },
+    "http": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 60000, "default": 15000 },
+        "retry": { "type": "integer", "minimum": 0, "maximum": 5, "default": 2 },
+        "followRedirects": { "type": "boolean", "default": true },
+        "rateLimit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rps": { "type": "number", "minimum": 0.1, "maximum": 10, "default": 2 },
+            "burst": { "type": "integer", "minimum": 1, "maximum": 20, "default": 4 }
+          }
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "method": { "enum": ["GET", "POST"], "default": "GET" },
+        "headers": { "$ref": "#/$defs/headers" },
+        "body": { "type": ["string", "null"], "maxLength": 8192 },
+        "contentType": { "type": "string", "maxLength": 128 },
+        "charset": { "type": "string", "maxLength": 32, "default": "utf-8" },
+        "expect": { "enum": ["html", "json", "text", "bytes"], "default": "html" },
+        "redirects": { "type": "integer", "minimum": 0, "maximum": 5, "default": 5 },
+        "cache": { "enum": ["default", "no-store", "only-if-cached"], "default": "default" }
+      }
+    },
+    "pipelineOp": {
+      "oneOf": [
+        {
+          "enum": ["trim", "lower", "upper", "absUrl", "decodeHtml", "decodeJs", "decodeUri",
+                   "urlencode", "base64", "stripTags", "number", "toInt", "toFloat", "toBool"]
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "object" }
+            ]
+          }
+        },
+        {
+          "type": "object",
+          "required": ["op"],
+          "additionalProperties": true,
+          "properties": {
+            "op": { "type": "string", "minLength": 1 },
+            "pattern": { "type": "string" },
+            "group": { "type": "integer" },
+            "value": {},
+            "separator": { "type": "string" },
+            "index": { "type": "integer" }
+          }
+        }
+      ]
+    },
+    "select": {
+      "oneOf": [
+        { "type": "string", "maxLength": 1024 },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/select" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "anyOf": [{ "required": ["select"] }, { "required": ["json"] }, { "required": ["const"] }],
+          "properties": {
+            "select": { "type": "string", "maxLength": 1024 },
+            "attr": { "type": "string", "maxLength": 64 },
+            "index": { "type": "integer" },
+            "json": { "type": "string", "maxLength": 512 },
+            "const": {},
+            "pipeline": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/pipelineOp" } },
+            "fallback": { "type": "array", "maxItems": 6, "items": { "$ref": "#/$defs/select" } },
+            "required": { "type": "boolean", "default": true }
+          }
+        }
+      ]
+    },
+    "fields": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 16,
+      "additionalProperties": { "$ref": "#/$defs/select" }
+    },
+    "list": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["select"],
+      "properties": {
+        "select": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 500, "default": 40 },
+        "skip": { "type": "integer", "minimum": 0, "maximum": 100, "default": 0 }
+      }
+    },
+    "paging": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hasNext": { "$ref": "#/$defs/select" },
+        "maxPage": { "type": "integer", "minimum": 1, "maximum": 500, "default": 100 }
+      }
+    },
+    "search": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request", "list", "fields"],
+      "properties": {
+        "request": { "$ref": "#/$defs/request" },
+        "list": { "$ref": "#/$defs/list" },
+        "fields": { "$ref": "#/$defs/fields" },
+        "paging": { "$ref": "#/$defs/paging" },
+        "allowEmpty": { "type": "boolean", "default": false }
+      }
+    },
+    "detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request", "fields"],
+      "properties": {
+        "request": { "$ref": "#/$defs/request" },
+        "root": { "type": "string", "maxLength": 1024 },
+        "fields": { "$ref": "#/$defs/fields" }
+      }
+    },
+    "chapters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request", "list", "fields"],
+      "properties": {
+        "request": { "$ref": "#/$defs/request" },
+        "list": { "$ref": "#/$defs/list" },
+        "fields": { "$ref": "#/$defs/fields" },
+        "reverse": { "type": "boolean", "default": false },
+        "dedupe": { "type": "boolean", "default": true },
+        "max": { "type": "integer", "minimum": 1, "maximum": 5000, "default": 5000 }
+      }
+    },
+    "lazy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "request", "value"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "total": { "$ref": "#/$defs/select" },
+        "request": { "$ref": "#/$defs/request" },
+        "value": { "$ref": "#/$defs/select" },
+        "batch": { "type": "integer", "minimum": 1, "maximum": 10, "default": 1 }
+      }
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request"],
+      "properties": {
+        "request": { "$ref": "#/$defs/request" },
+        "expect": { "enum": ["html", "json", "text", "bytes"] },
+        "list": { "$ref": "#/$defs/list" },
+        "fields": { "$ref": "#/$defs/fields" },
+        "multi": { "type": "boolean", "default": false },
+        "order": { "enum": ["asc", "desc"], "default": "asc" },
+        "headers": { "$ref": "#/$defs/headers" },
+        "lazy": { "$ref": "#/$defs/lazy" }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "request": { "$ref": "#/$defs/request" },
+        "value": { "$ref": "#/$defs/select" }
+      }
+    },
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "request", "fields"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "title"],
+            "anyOf": [{ "required": ["path"] }, { "required": ["url"] }],
+            "properties": {
+              "id": { "type": "string", "maxLength": 64 },
+              "title": { "type": "string", "maxLength": 64 },
+              "path": { "type": "string", "maxLength": 1024 },
+              "url": { "type": "string", "maxLength": 2048 }
+            }
+          }
+        },
+        "request": { "$ref": "#/$defs/request" },
+        "list": { "$ref": "#/$defs/list" },
+        "fields": { "$ref": "#/$defs/fields" },
+        "paging": { "$ref": "#/$defs/paging" }
+      }
+    },
+    "scripts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "search": { "$ref": "#/$defs/script" },
+        "detail": { "$ref": "#/$defs/script" },
+        "chapters": { "$ref": "#/$defs/script" },
+        "images": { "$ref": "#/$defs/script" },
+        "lazyUrl": { "$ref": "#/$defs/script" }
+      }
+    },
+    "script": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 65536,
+      "description": "ES5.1 函数体，签名为 function(ctx) { ... }；在受限 Rhino 沙箱中执行。"
+    },
+    "configItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "label"],
+      "properties": {
+        "type": { "const": "string" },
+        "label": { "type": "string", "maxLength": 64 },
+        "default": { "type": "string", "maxLength": 512 },
+        "description": { "type": "string", "maxLength": 256 }
+      }
+    }
+  }
+}

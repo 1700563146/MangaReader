@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞（私密报告）
+    url: https://github.com/1700563146/MangaReader/security/advisories/new
+    about: 请勿公开披露沙箱逃逸、签名绕过、凭据泄露等可利用细节。
+  - name: 使用与配置问题
+    url: https://github.com/1700563146/MangaReader/discussions
+    about: 安装、规则导入、备份恢复等使用问题请先查阅文档与 Discussions。
+  - name: 规则包问题
+    url: https://github.com/1700563146/MangaReader/issues/new?template=rule-report.yml
+    about: 规则解析失败、字段缺失、图片 403 等，请使用规则问题模板。

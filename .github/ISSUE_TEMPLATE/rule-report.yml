@@ -1,0 +1,64 @@
+name: 规则问题
+description: 规则导入失败、解析为空、图片 403、需要新能力
+title: "[Rule] "
+labels: ["rules", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        规则问题请提供**最小可复现信息**。不要粘贴完整站点页面或漫画内容；用结构片段（≤ 30 行）代替。
+        如果是站点改版，请附上「页面上对应的选择器文本」而非页面源码全文。
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 失败阶段
+      options:
+        - 导入/校验
+        - 搜索 search
+        - 详情 detail
+        - 章节 chapters
+        - 图片列表 images
+        - 惰性解析 lazy
+        - 检查更新 check
+        - 分类 category
+        - 脚本钩子 scripts
+    validations:
+      required: true
+  - type: input
+    id: rule_id
+    attributes:
+      label: 规则 id 与版本
+      placeholder: "community.example 1.0.0（引擎版本 1）"
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: 错误信息
+      description: 请贴出应用内展示的错误码与 JSON Pointer（如 /search/fields/cover/pipeline/0）。
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现方式
+      placeholder: |
+        1. 导入规则
+        2. 搜索关键词 …
+        3. 结果为空 / 报错 …
+  - type: textarea
+    id: sample
+    attributes:
+      label: 脱敏结构片段（可选）
+      description: 只保留与选择器相关的 HTML/JSON 片段，删除域名、Token、Cookie、图片地址。
+      render: html
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 未粘贴真实站点域名、Token、Cookie 或漫画内容
+          required: true
+        - label: 已尝试用最新引擎版本复现
+          required: true

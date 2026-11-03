@@ -1,0 +1,54 @@
+name: 侵权下架申请
+description: 权利人针对仓库内容（文档、示例规则、索引条目）的投诉
+title: "[Takedown] "
+labels: ["takedown", "priority:high"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **重要**：本项目不托管、不存储、不分发任何漫画内容，也不内置具体站点规则。
+        > 若侵权内容位于第三方站点，请直接联系该站点；本模板仅处理本仓库内的内容（如文档、示例、社区索引条目）。
+        > 请勿在公开 issue 中提交身份证件、合同等敏感材料；可先说明情况，我们会提供私密渠道。
+  - type: input
+    id: claimant
+    attributes:
+      label: 权利人/代理方名称
+      placeholder: "公司或个人名称"
+    validations:
+      required: true
+  - type: input
+    id: contact
+    attributes:
+      label: 联系方式（邮箱）
+      placeholder: "legal@example.com"
+    validations:
+      required: true
+  - type: textarea
+    id: work
+    attributes:
+      label: 涉及作品与权利证明
+      description: 作品名称、权利类型（著作权/信息网络传播权等）、登记号或授权链摘要。
+    validations:
+      required: true
+  - type: textarea
+    id: location
+    attributes:
+      label: 仓库内的具体位置
+      description: 文件路径/规则 id/版本/提交号；请精确到可定位。
+      placeholder: "docs/examples/... 或 rule id community.xxx v1.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: action
+    attributes:
+      label: 期望处理
+      placeholder: "删除相关内容 / 下架规则 / 禁用索引条目"
+    validations:
+      required: true
+  - type: textarea
+    id: statement
+    attributes:
+      label: 真实性声明
+      description: 请声明信息真实、你是权利人或有代理权限，并知悉虚假声明的法律后果。
+    validations:
+      required: true
