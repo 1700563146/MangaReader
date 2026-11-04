@@ -168,6 +168,15 @@ interface ComicDao {
     @Query("UPDATE comic SET history_at = :at WHERE id = :id")
     suspend fun touchHistory(id: Long, at: Long)
 
+    @Query("UPDATE comic SET history_at = NULL, last_chapter_path = NULL, last_chapter_title = NULL, last_page = 0 WHERE id = :id")
+    suspend fun clearHistory(id: Long)
+
+    @Query("UPDATE comic SET history_at = NULL, last_chapter_path = NULL, last_chapter_title = NULL, last_page = 0")
+    suspend fun clearAllHistory()
+
+    @Query("UPDATE comic SET favorite_at = CASE WHEN :at = 0 THEN NULL ELSE :at END WHERE id IN (:ids)")
+    suspend fun setFavoriteBulk(ids: List<Long>, at: Long)
+
     @Query("UPDATE comic SET downloaded_at = :at WHERE id = :id")
     suspend fun setDownloaded(id: Long, at: Long?)
 

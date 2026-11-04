@@ -46,8 +46,40 @@ class ShelfViewModel @Inject constructor(
     private val _updatesOnly = MutableStateFlow(false)
     val updatesOnly: StateFlow<Boolean> = _updatesOnly
 
+    private val _selection = MutableStateFlow<Set<Long>>(emptySet())
+    val selection: StateFlow<Set<Long>> = _selection
+
+    private val _selectionMode = MutableStateFlow(false)
+    val selectionMode: StateFlow<Boolean> = _selectionMode
+
     fun toggleUpdatesOnly() {
         _updatesOnly.value = !_updatesOnly.value
+    }
+
+    fun toggleSelection(comicId: Long) {
+        val current = _selection.value
+        _selection.value = if (comicId in current) current - comicId else current + comicId
+        _selectionMode.value = _selection.value.isNotEmpty()
+    }
+
+    fun clearSelection() {
+        _selection.value = emptySet()
+        _selectionMode.value = false
+    }
+
+    fun selectAll(comics: List<Comic>) {
+        _selection.value = comics.map { it.id }.toSet()
+        _selectionMode.value = _selection.value.isNotEmpty()
+    }
+
+    fun unfavoriteSelected() {
+        val ids = _selection.value.toList()
+        if (ids.isEmpty()) return
+        viewModelScope.launch {
+            comics.setFavoriteBulk(ids, favorite = false)
+            _message.value = "已取消收藏 ${ids.size} 本"
+            clearSelection()
+        }
     }
 
     fun checkUpdates() {

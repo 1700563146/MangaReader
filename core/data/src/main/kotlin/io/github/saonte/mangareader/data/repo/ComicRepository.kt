@@ -22,6 +22,9 @@ interface ComicRepository {
     suspend fun clearHighlight(comicId: Long)
     suspend fun setUpdate(comicId: Long, updateText: String?, at: Long, highlight: Boolean)
     suspend fun delete(comicId: Long)
+    suspend fun clearHistory(comicId: Long)
+    suspend fun clearAllHistory()
+    suspend fun setFavoriteBulk(comicIds: List<Long>, favorite: Boolean)
 }
 
 @Singleton
@@ -102,4 +105,14 @@ class ComicRepositoryImpl @Inject constructor(
         dao.setUpdate(comicId, updateText, at, highlight)
 
     override suspend fun delete(comicId: Long) = dao.delete(comicId)
+
+    override suspend fun clearHistory(comicId: Long) = dao.clearHistory(comicId)
+
+    override suspend fun clearAllHistory() = dao.clearAllHistory()
+
+    override suspend fun setFavoriteBulk(comicIds: List<Long>, favorite: Boolean) {
+        if (comicIds.isEmpty()) return
+        val now = if (favorite) System.currentTimeMillis() else 0L
+        dao.setFavoriteBulk(comicIds, now)
+    }
 }

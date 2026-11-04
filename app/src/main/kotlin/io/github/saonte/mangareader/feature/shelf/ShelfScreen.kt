@@ -1,6 +1,8 @@
 package io.github.saonte.mangareader.feature.shelf
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,6 +44,8 @@ fun ShelfScreen(
     val checking by viewModel.checking.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val updatesOnly by viewModel.updatesOnly.collectAsStateWithLifecycle()
+    val selection by viewModel.selection.collectAsStateWithLifecycle()
+    val selectionMode by viewModel.selectionMode.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -57,8 +62,16 @@ fun ShelfScreen(
             ) {
                 Text(if (checking) "检查中…" else "检查更新")
             }
-            TextButton(onClick = viewModel::toggleUpdatesOnly) {
-                Text(if (updatesOnly) "全部" else "仅更新")
+            if (selectionMode) {
+                TextButton(onClick = viewModel::clearSelection) { Text("取消") }
+                TextButton(onClick = { viewModel.selectAll(shelf) }) { Text("全选") }
+                TextButton(onClick = viewModel::unfavoriteSelected) {
+                    Text("取消收藏(${selection.size})")
+                }
+            } else {
+                TextButton(onClick = viewModel::toggleUpdatesOnly) {
+                    Text(if (updatesOnly) "全部" else "仅更新")
+                }
             }
         }
         message?.let {
@@ -99,19 +112,38 @@ fun ShelfScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 items(visibleShelf, key = { it.id }) { comic ->
-                    ShelfItem(comic, onClick = { onOpenDetail(comic.source, comic.cid) })
+                    ShelfItem(
+                        comic = comic,
+                        selected = comic.id in selection,
+                        selectionMode = selectionMode,
+                        onClick = {
+                            if (selectionMode) {
+                                viewModel.toggleSelection(comic.id)
+                            } else {
+                                onOpenDetail(comic.source, comic.cid)
+                            }
+                        },
+                        onLongClick = { viewModel.toggleSelection(comic.id) },
+                    )
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ShelfItem(comic: Comic, onClick: () -> Unit) {
+private fun ShelfItem(
+    comic: Comic,
+    selected: Boolean,
+    selectionMode: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
     Column(
         modifier = Modifier
-            .clickable(onClick = onClick)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
         AsyncImage(
             model = comic.cover,
@@ -136,5 +168,12 @@ private fun ShelfItem(comic: Comic, onClick: () -> Unit) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        if (selectionMode) {
+            Checkbox(
+                checked = selected,
+                onCheckedChange = { onClick() },
+                modifier = Modifier.padding(start = 4.dp),
+            )
+        }
     }
 }
