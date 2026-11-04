@@ -1,10 +1,12 @@
 package io.github.saonte.mangareader.feature.reader
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.saonte.mangareader.data.repo.ChapterRepository
 import io.github.saonte.mangareader.data.repo.ComicRepository
 import io.github.saonte.mangareader.data.repo.SourceRepository
@@ -40,6 +42,7 @@ sealed interface ReaderSessionState {
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    @ApplicationContext private val context: Context,
     private val sourceManager: SourceManager,
     private val engine: SourceEngine,
     private val comics: ComicRepository,
@@ -62,12 +65,19 @@ class ReaderViewModel @Inject constructor(
             var loadedSource: Long? = null
             runCatching {
                 val comic = comics.findById(route.comicId) ?: error("漫画不存在")
-                loadedSource = comic.source
+                loadedSource = comic.source.takeIf { it > 0 }
                 val chapterList = chapters.list(comic.id)
                 val index = chapterList.indexOfFirst { it.path == route.chapterPath }
                 val chapter = chapterList.getOrNull(index) ?: error("章节不存在或已被源移除")
                 val offlineDir = downloads.completedDir(chapter.id)
-                val pageSource = if (offlineDir != null) {
+                val pageSource = if (comic.local) {
+                    LocalPageSource(
+                        context = context,
+                        rootUri = comic.url ?: error("本地目录缺失"),
+                        relativePath = chapter.path,
+                        chapterTitle = chapter.title,
+                    )
+                } else if (offlineDir != null) {
                     FilePageSource(File(offlineDir), chapter.title)
                 } else {
                     val ref = sourceManager.ref(comic.source) ?: error("源不可用，请重新启用规则")

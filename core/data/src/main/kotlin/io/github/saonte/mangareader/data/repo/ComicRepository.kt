@@ -11,6 +11,7 @@ interface ComicRepository {
     fun observeShelf(): Flow<List<Comic>>
     fun observeHistory(limit: Int = 100): Flow<List<Comic>>
     fun observeUpdates(): Flow<List<Comic>>
+    fun observeLocal(): Flow<List<Comic>>
     fun observeFavoriteCount(): Flow<Int>
     suspend fun findBySource(source: Long, cid: String): Comic?
     suspend fun findById(id: Long): Comic?
@@ -36,6 +37,9 @@ class ComicRepositoryImpl @Inject constructor(
 
     override fun observeUpdates(): Flow<List<Comic>> =
         dao.observeUpdates().map { list -> list.map { it.toDomain() } }
+
+    override fun observeLocal(): Flow<List<Comic>> =
+        dao.observeLocal().map { list -> list.map { it.toDomain() } }
 
     override fun observeFavoriteCount(): Flow<Int> = dao.observeFavoriteCount()
 

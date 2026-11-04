@@ -34,6 +34,8 @@ import io.github.saonte.mangareader.designsystem.theme.MangaReaderTheme
 import io.github.saonte.mangareader.feature.browse.BrowseScreen
 import io.github.saonte.mangareader.feature.detail.DetailScreen
 import io.github.saonte.mangareader.feature.downloads.DownloadsScreen
+import io.github.saonte.mangareader.feature.local.LocalDetailScreen
+import io.github.saonte.mangareader.feature.local.LocalScreen
 import io.github.saonte.mangareader.feature.history.HistoryScreen
 import io.github.saonte.mangareader.feature.reader.ReaderDemoScreen
 import io.github.saonte.mangareader.feature.reader.ReaderRouteScreen
@@ -46,6 +48,8 @@ import io.github.saonte.mangareader.navigation.BrowseRoute
 import io.github.saonte.mangareader.navigation.HistoryRoute
 import io.github.saonte.mangareader.navigation.DetailRoute
 import io.github.saonte.mangareader.navigation.DownloadsRoute
+import io.github.saonte.mangareader.navigation.LocalDetailRoute
+import io.github.saonte.mangareader.navigation.LocalRoute
 import io.github.saonte.mangareader.navigation.ReaderDemoRoute
 import io.github.saonte.mangareader.navigation.ReaderRoute
 import io.github.saonte.mangareader.navigation.RulesRoute
@@ -114,6 +118,20 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                 composable<DownloadsRoute> {
                     DownloadsScreen(onBack = { navController.popBackStack() })
                 }
+                composable<LocalRoute> {
+                    LocalScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenComic = { comicId -> navController.navigate(LocalDetailRoute(comicId)) },
+                    )
+                }
+                composable<LocalDetailRoute> {
+                    LocalDetailScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenReader = { comicId, chapterPath ->
+                            navController.navigate(ReaderRoute(comicId, chapterPath))
+                        },
+                    )
+                }
                 composable<DetailRoute> {
                     DetailScreen(
                         onBack = { navController.popBackStack() },
@@ -130,6 +148,7 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                         onOpenReaderDemo = { navController.navigate(ReaderDemoRoute) },
                         onOpenRules = { navController.navigate(RulesRoute) },
                         onOpenDownloads = { navController.navigate(DownloadsRoute) },
+                        onOpenLocal = { navController.navigate(LocalRoute) },
                     )
                 }
                 composable<ReaderDemoRoute> {

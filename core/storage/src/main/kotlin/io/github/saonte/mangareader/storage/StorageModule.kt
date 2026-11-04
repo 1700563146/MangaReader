@@ -27,4 +27,8 @@ abstract class DownloadBindingModule {
     @Binds
     @Singleton
     abstract fun bindDownloadScheduler(impl: WorkManagerDownloadScheduler): DownloadScheduler
+
+    @Binds
+    @Singleton
+    abstract fun bindLocalScanner(impl: DocumentLocalScanner): LocalScanner
 }

@@ -104,6 +104,12 @@ interface ComicDao {
     @Query("SELECT * FROM comic WHERE source = :source ORDER BY id ASC")
     suspend fun listBySource(source: Long): List<ComicEntity>
 
+    @Query("SELECT * FROM comic WHERE local = 1 ORDER BY title ASC")
+    fun observeLocal(): Flow<List<ComicEntity>>
+
+    @Query("SELECT * FROM comic WHERE local = 1 AND cid = :cid LIMIT 1")
+    suspend fun findLocal(cid: String): ComicEntity?
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIgnore(entity: ComicEntity): Long
 

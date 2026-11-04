@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.okhttp)
+    implementation(libs.androidx.documentfile)
 
     testImplementation(libs.junit4)
     testImplementation(libs.truth)

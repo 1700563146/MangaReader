@@ -36,6 +36,7 @@ fun SettingsScreen(
     onOpenReaderDemo: () -> Unit = {},
     onOpenRules: () -> Unit = {},
     onOpenDownloads: () -> Unit = {},
+    onOpenLocal: () -> Unit = {},
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
 
@@ -58,6 +59,12 @@ fun SettingsScreen(
             modifier = Modifier.padding(start = 12.dp),
         ) {
             Text("下载管理")
+        }
+        TextButton(
+            onClick = onOpenLocal,
+            modifier = Modifier.padding(start = 12.dp),
+        ) {
+            Text("本地漫画")
         }
 
         SectionTitle(stringResource(R.string.settings_appearance))

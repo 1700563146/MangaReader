@@ -32,6 +32,12 @@ data object RulesRoute
 @Serializable
 data object DownloadsRoute
 
+@Serializable
+data object LocalRoute
+
+@Serializable
+data class LocalDetailRoute(val comicId: Long)
+
 /** Debug 专用：本地占位图阅读器演示，不包含任何漫画内容。 */
 @Serializable
 data object ReaderDemoRoute
