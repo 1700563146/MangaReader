@@ -30,9 +30,17 @@ class RulesViewModel @Inject constructor(
     private val _state = MutableStateFlow(RulesUiState())
     val state: StateFlow<RulesUiState> = _state.asStateFlow()
 
+    private val _revoked = MutableStateFlow<Set<Long>>(emptySet())
+    val revoked: StateFlow<Set<Long>> = _revoked
+
     init {
         viewModelScope.launch {
             sourceManager.observeSources().collect { sources ->
+                val revoked = sources.filter { sourceManager.isRevoked(it.type) }.map { it.type }.toSet()
+                _revoked.value = revoked
+                sources.filter { it.enabled && it.type in revoked }.forEach {
+                    sourceManager.setEnabled(it.type, false)
+                }
                 _state.update { it.copy(sources = sources) }
             }
         }

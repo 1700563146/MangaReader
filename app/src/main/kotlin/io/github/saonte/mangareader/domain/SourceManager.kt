@@ -7,6 +7,7 @@ import io.github.saonte.mangareader.source.SourceRef
 import io.github.saonte.mangareader.source.rule.RuleCompiler
 import io.github.saonte.mangareader.source.rule.RuleCompileResult
 import io.github.saonte.mangareader.source.rule.RuleIssue
+import io.github.saonte.mangareader.source.rule.RevocationList
 import io.github.saonte.mangareader.source.rule.RuleSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -28,6 +29,7 @@ sealed interface InstallResult {
 class SourceManager @Inject constructor(
     private val sources: SourceRepository,
     private val compiler: RuleCompiler = RuleCompiler(),
+    private val revocations: RevocationList = RevocationList.EMPTY,
 ) {
     private val cache = ConcurrentHashMap<Long, RuleSpec>()
 
@@ -42,6 +44,7 @@ class SourceManager @Inject constructor(
         if (cached != null) return SourceRef(type, cached)
         val source = sources.get(type) ?: return null
         val rule = compileOrNull(source.json) ?: return null
+        if (revocations.isRevoked(rule.id, rule.version)) return null
         cache[type] = rule
         return SourceRef(type, rule)
     }
@@ -55,6 +58,17 @@ class SourceManager @Inject constructor(
         val result = compiler.compile(raw)
         if (result is RuleCompileResult.Failure) return InstallResult.Invalid(result.issues)
         val rule = (result as RuleCompileResult.Success).rule
+        if (revocations.isRevoked(rule.id, rule.version)) {
+            return InstallResult.Invalid(
+                listOf(
+                    RuleIssue(
+                        severity = io.github.saonte.mangareader.source.rule.IssueSeverity.ERROR,
+                        pointer = "/id",
+                        message = "该规则已被撤销，无法安装",
+                    ),
+                ),
+            )
+        }
         val type = sources.install(
             InstalledRule(
                 ruleId = rule.id,
@@ -73,6 +87,12 @@ class SourceManager @Inject constructor(
     }
 
     suspend fun setEnabled(type: Long, enabled: Boolean) = sources.setEnabled(type, enabled)
+
+    suspend fun isRevoked(type: Long): Boolean {
+        val source = sources.get(type) ?: return false
+        val rule = cache[type] ?: compileOrNull(source.json)?.also { cache[type] = it } ?: return false
+        return revocations.isRevoked(rule.id, rule.version)
+    }
 
     suspend fun delete(type: Long) {
         sources.delete(type)

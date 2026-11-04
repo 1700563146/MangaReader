@@ -43,6 +43,7 @@ fun RulesScreen(
     viewModel: RulesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val revoked by viewModel.revoked.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -90,6 +91,7 @@ fun RulesScreen(
                 items(state.sources, key = { it.type }) { source ->
                     SourceRow(
                         source = source,
+                        revoked = source.type in revoked,
                         onToggle = { enabled -> viewModel.setEnabled(source, enabled) },
                         onDelete = { viewModel.delete(source) },
                     )
@@ -112,6 +114,7 @@ fun RulesScreen(
 @Composable
 private fun SourceRow(
     source: Source,
+    revoked: Boolean,
     onToggle: (Boolean) -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -128,7 +131,9 @@ private fun SourceRow(
                     append(source.ruleId)
                     append(" · v")
                     append(source.version)
-                    if (source.health != SourceHealth.HEALTHY) {
+                    if (revoked) {
+                        append(" · 已撤销")
+                    } else if (source.health != SourceHealth.HEALTHY) {
                         append(" · ")
                         append(if (source.health == SourceHealth.DEGRADED) "降级" else "已禁用")
                     }
@@ -149,7 +154,7 @@ private fun SourceRow(
             }
         }
         TextButton(onClick = onDelete) { Text(stringResource(R.string.rules_delete)) }
-        Switch(checked = source.enabled, onCheckedChange = onToggle)
+        Switch(checked = source.enabled && !revoked, onCheckedChange = onToggle, enabled = !revoked)
     }
 }
 
