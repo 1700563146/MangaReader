@@ -4,8 +4,8 @@ import io.github.saonte.mangareader.model.ErrorCode
 import io.github.saonte.mangareader.source.ChapterInfo
 import io.github.saonte.mangareader.source.ComicDetail
 import io.github.saonte.mangareader.source.ComicSummary
+import io.github.saonte.mangareader.model.ImageRef
 import io.github.saonte.mangareader.source.ImagePage
-import io.github.saonte.mangareader.source.ImageRef
 import io.github.saonte.mangareader.source.SearchPage
 import io.github.saonte.mangareader.source.SourceEngine
 import io.github.saonte.mangareader.source.SourceFailure

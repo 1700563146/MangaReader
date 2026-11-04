@@ -186,6 +186,9 @@ interface ChapterDao {
     @Query("UPDATE chapter SET downloaded = 1, size_bytes = :sizeBytes WHERE id = :id")
     suspend fun markDownloaded(id: Long, sizeBytes: Long)
 
+    @Query("UPDATE chapter SET downloaded = 0, size_bytes = 0 WHERE id = :id")
+    suspend fun markNotDownloaded(id: Long)
+
     @Query("UPDATE chapter SET last_page = :page, read_at = :at WHERE id = :id")
     suspend fun savePage(id: Long, page: Int, at: Long)
 
@@ -246,6 +249,12 @@ interface DownloadTaskDao {
     @Query("SELECT * FROM download_task WHERE state = :state ORDER BY created_at ASC")
     fun observeByState(state: Int): Flow<List<DownloadTaskEntity>>
 
+    @Query("SELECT * FROM download_task WHERE comic_id = :comicId ORDER BY created_at DESC")
+    fun observeByComic(comicId: Long): Flow<List<DownloadTaskEntity>>
+
+    @Query("SELECT * FROM download_task WHERE chapter_id = :chapterId LIMIT 1")
+    suspend fun findByChapter(chapterId: Long): DownloadTaskEntity?
+
     @Query("SELECT * FROM download_task WHERE chapter_id = :chapterId LIMIT 1")
     fun observeByChapter(chapterId: Long): Flow<DownloadTaskEntity?>
 
@@ -271,6 +280,9 @@ interface DownloadTaskDao {
 
     @Query("DELETE FROM download_task WHERE chapter_id = :chapterId")
     suspend fun deleteByChapter(chapterId: Long)
+
+    @Query("DELETE FROM download_task WHERE id = :id")
+    suspend fun deleteById(id: Long)
 
     @Query("DELETE FROM download_task WHERE comic_id = :comicId")
     suspend fun deleteByComic(comicId: Long)

@@ -18,6 +18,39 @@
 
 - 明确零内置源、规则沙箱、签名与撤销机制、实名投诉通道。
 
+## [0.5.0-M4] - 2026-11-04
+
+### Added
+
+- WorkManager 下载队列：`DownloadWorker`（HiltWorker）、前台通知、暂停/继续/删除、断点续传、`.part` 原子写入。
+- 图片下载走 host 白名单 + 页级 Referer；32MB 单图上限。
+- 离线阅读：`FilePageSource`；`ReaderViewModel` 优先使用已下载目录。
+- 离线详情：缓存优先，刷新失败提示「显示已缓存内容」。
+- 下载管理页（进度/暂停/继续/删除）与详情页逐章下载按钮。
+
+### Fixed
+
+- WorkManager 网络约束在未通过系统校验的网络下永不执行：改为 `NOT_REQUIRED` 并 `REPLACE` 旧任务。
+- `SystemForegroundService` 缺少 `foregroundServiceType=dataSync` 导致下载启动崩溃。
+- 详情页离线时强制刷新导致整页失败：改为缓存优先。
+
+## [0.4.0-M3] - 2026-11-04
+
+### Added
+
+- 规则管理：列表、启停、删除、剪贴板导入、JSON Pointer 错误提示、编译缓存（`SourceManager`）。
+- 聚合搜索：`SearchCoordinator` 并发按源请求、先到先发、单源超时与失败隔离、健康度上报。
+- 搜索页 / 详情页 / 书架 / 历史 / 规则页 Compose UI，导航闭环。
+- `ReaderRoute` 在线章节阅读：规则引擎取图（含 lazy）、进度写库、继续阅读。
+- 书架检查更新（4 并发，失败不覆盖旧值）。
+- Debug 本地假源（`tools/devserver` + `DevInstallActivity`/`dev_rule.json`，release 不含）。
+- Room 迁移仪器化测试（v1→v2）。
+
+### Fixed
+
+- Android ICU 不支持未转义 `}` 的正则：修复模板变量正则导致的启动崩溃。
+- `ImageRef` 统一为 `core-model` 类型，消除 source/reader 双模型转换。
+
 ## [0.3.0-M2] - 2026-11-04
 
 ### Added

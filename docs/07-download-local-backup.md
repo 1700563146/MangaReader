@@ -215,6 +215,13 @@ class DownloadWorker(
 | 包含规则 | 是 | 多设备同步源配置 |
 | 包含设置 | 是 | 不含凭据 |
 
+## 4.4 实现记录（M4）
+
+- 下载任务使用 WorkManager 唯一工作 `dl:<chapterId>`；约束为 `NOT_REQUIRED`（系统要求 `VALIDATED` 的网络会让内网/模拟器任务永不执行，失败由重试与 UI 兜底）。
+- 前台服务：Manifest 覆盖 `androidx.work.impl.foreground.SystemForegroundService` 的 `foregroundServiceType="dataSync"`。
+- 目录固定为应用私有：`files/Manga/downloaded/source_<type>/comic_<id>/chapter_<id>/001.png`；SAF 可配置目录在 M4 收尾/备份阶段接入。
+- 进度写 `download_task`，每 2 页落库并更新通知；完成后写 `chapter.downloaded` 与 `comic.downloaded_at`。
+
 ## 5. 删除与隐私
 
 - 「清除全部数据」：清空数据库 + 下载目录 + 缓存 + 备份记录 + 规则；保留应用本身。二次确认要求输入「清除」。

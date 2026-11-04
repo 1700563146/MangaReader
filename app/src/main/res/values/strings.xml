@@ -26,5 +26,19 @@
     <string name="settings_legal_hint">GPL-3.0 · 不提供任何漫画内容</string>
 
     <string name="action_retry">重试</string>
+
+    <string name="search_hint">搜索漫画</string>
+    <string name="search_action">搜索</string>
+    <string name="search_empty_title">输入关键词开始</string>
+    <string name="search_empty_body">结果会按源分组、先返回先显示。请先导入并启用一份规则。</string>
+    <string name="rules_manage">规则管理</string>
+    <string name="rules_import">导入规则</string>
+    <string name="rules_paste">粘贴</string>
+    <string name="rules_confirm">导入</string>
+    <string name="rules_cancel">取消</string>
+    <string name="rules_delete">删除</string>
+    <string name="rules_import_hint">粘贴规则 JSON</string>
+    <string name="rules_empty_title">还没有导入规则</string>
+    <string name="rules_empty_body">规则是 JSON 数据文件，描述一个站点如何搜索、解析详情与图片。本应用不内置任何源。</string>
     <string name="placeholder_m0">M0 骨架：功能将在后续里程碑接入</string>
 </resources>

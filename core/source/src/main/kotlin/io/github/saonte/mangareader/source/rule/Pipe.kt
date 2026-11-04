@@ -12,7 +12,7 @@ import java.util.Base64
  * 模板变量与管道变换的单一实现，供 RequestBuilder 与 Selector 共用。
  */
 object Template {
-    private val EXPR = Regex("""\$\{([^}]+)}""")
+    private val EXPR = Regex("""\$\{([^}]+)\}""")
 
     fun render(template: String, vars: Map<String, String>): String =
         EXPR.replace(template) { match ->

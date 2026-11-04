@@ -1,0 +1,145 @@
+{
+  "$schema": "../schema/source-rule.schema.json",
+  "schemaVersion": 1,
+  "id": "community.example",
+  "name": "示例源（占位）",
+  "version": "1.0.0",
+  "minEngine": 1,
+  "baseUrl": "https://example.com",
+  "hosts": ["example.com"],
+  "imageHosts": ["img.example.com", "*.example-cdn.com"],
+  "allowCleartext": false,
+  "adult": false,
+  "lang": "zh-CN",
+  "author": "MangaReader Docs",
+  "description": "仅用于演示规则语法的占位源，不指向任何真实站点，也不包含任何漫画内容。",
+  "homepage": "https://example.com/rules",
+  "headers": {
+    "User-Agent": "MangaReader/1.0 (+https://example.com/doc)",
+    "Referer": "https://example.com/"
+  },
+  "http": {
+    "timeoutMs": 15000,
+    "retry": 2,
+    "followRedirects": true,
+    "rateLimit": { "rps": 2, "burst": 4 }
+  },
+  "capabilities": ["search", "detail", "chapters", "images", "check", "category"],
+  "search": {
+    "request": {
+      "url": "https://example.com/search?q=${keyword|urlencode}&page=${page}",
+      "headers": { "Referer": "https://example.com/" },
+      "expect": "html"
+    },
+    "list": { "select": "ul.result > li", "limit": 40 },
+    "fields": {
+      "cid": {
+        "select": "a.cover",
+        "attr": "href",
+        "pipeline": [{ "op": "regex", "pattern": "/comic/(\\d+)/?", "group": 1 }]
+      },
+      "title": "a.title",
+      "cover": {
+        "select": "img",
+        "attr": "data-src",
+        "fallback": ["img@src"],
+        "pipeline": ["trim", "absUrl"]
+      },
+      "author": "span.author",
+      "update": "span.update",
+      "finish": {
+        "select": "span.status",
+        "pipeline": [{ "op": "map", "value": { "连载": false, "完结": true } }, "toBool"]
+      }
+    },
+    "paging": {
+      "hasNext": { "select": "a.next:not(.disabled)", "attr": "href" },
+      "maxPage": 100
+    },
+    "allowEmpty": false
+  },
+  "detail": {
+    "request": { "url": "https://example.com/comic/${cid}/" },
+    "root": "div.comic-info",
+    "fields": {
+      "title": "h1",
+      "cover": { "select": "img.cover", "attr": "src", "pipeline": ["absUrl"] },
+      "author": "a.author",
+      "intro": {
+        "select": "div.intro",
+        "attr": "html",
+        "pipeline": ["stripTags", "trim"]
+      },
+      "finish": {
+        "select": "span.status",
+        "pipeline": [{ "op": "map", "value": { "连载": false, "完结": true } }, "toBool"]
+      },
+      "update": "span.update",
+      "url": { "const": "https://example.com/comic/${cid}/" }
+    }
+  },
+  "chapters": {
+    "request": { "url": "https://example.com/comic/${cid}/" },
+    "list": { "select": "ul.chapter-list > li", "limit": 500 },
+    "fields": {
+      "title": "a",
+      "path": { "select": "a", "attr": "href", "pipeline": ["absUrl"] },
+      "group": { "select": "span.volume", "pipeline": ["trim"] }
+    },
+    "reverse": true,
+    "dedupe": true,
+    "max": 5000
+  },
+  "images": {
+    "request": {
+      "url": "${chapterPath}",
+      "headers": { "Referer": "https://example.com/" },
+      "expect": "html"
+    },
+    "list": { "select": "div.reader img", "limit": 500 },
+    "fields": {
+      "url": { "select": "", "attr": "data-src", "pipeline": ["absUrl"] },
+      "urls": { "select": "", "attr": "data-fallback" }
+    },
+    "multi": true,
+    "order": "asc",
+    "headers": { "Referer": "${chapterPath}" },
+    "lazy": {
+      "enabled": false,
+      "total": { "select": "span.total-page", "pipeline": ["number"] },
+      "request": {
+        "url": "https://example.com/chapter/${cid}/${index}.json",
+        "expect": "json",
+        "headers": { "Referer": "${chapterPath}" }
+      },
+      "value": { "json": "$.data.url", "pipeline": ["absUrl"] },
+      "batch": 1
+    }
+  },
+  "check": {
+    "request": { "url": "https://example.com/comic/${cid}/" },
+    "value": { "select": "span.update", "pipeline": ["trim"] }
+  },
+  "category": {
+    "items": [
+      { "id": "hot", "title": "热门", "path": "/list/hot/${page}" },
+      { "id": "new", "title": "最新", "path": "/list/new/${page}" }
+    ],
+    "request": { "url": "https://example.com${path}" },
+    "list": { "select": "ul.list > li" },
+    "fields": {
+      "cid": {
+        "select": "a",
+        "attr": "href",
+        "pipeline": [{ "op": "regex", "pattern": "/comic/(\\d+)", "group": 1 }]
+      },
+      "title": "a.title",
+      "cover": { "select": "img", "attr": "data-src", "pipeline": ["absUrl"] }
+    },
+    "paging": { "hasNext": { "select": "a.next", "attr": "href" } }
+  },
+  "scripts": {
+    "detail": "function(ctx) { var t = ctx.doc('h1').text(); return t ? { title: t } : null; }",
+    "images": "function(ctx) { var out = []; var re = /data-src=\"([^\"]+)\"/g; var m; while ((m = re.exec(ctx.html)) !== null) { out.push({ url: ctx.resolve(m[1]) }); } return out; }"
+  }
+}

@@ -27,18 +27,29 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import io.github.saonte.mangareader.MainViewModel
 import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.designsystem.theme.MangaReaderTheme
 import io.github.saonte.mangareader.feature.browse.BrowseScreen
+import io.github.saonte.mangareader.feature.detail.DetailScreen
+import io.github.saonte.mangareader.feature.downloads.DownloadsScreen
 import io.github.saonte.mangareader.feature.history.HistoryScreen
 import io.github.saonte.mangareader.feature.reader.ReaderDemoScreen
+import io.github.saonte.mangareader.feature.reader.ReaderRouteScreen
+import io.github.saonte.mangareader.feature.rules.RulesScreen
+import io.github.saonte.mangareader.feature.search.SearchScreen
 import io.github.saonte.mangareader.feature.settings.SettingsScreen
 import io.github.saonte.mangareader.feature.shelf.ShelfScreen
 import io.github.saonte.mangareader.model.ThemeMode
 import io.github.saonte.mangareader.navigation.BrowseRoute
 import io.github.saonte.mangareader.navigation.HistoryRoute
+import io.github.saonte.mangareader.navigation.DetailRoute
+import io.github.saonte.mangareader.navigation.DownloadsRoute
 import io.github.saonte.mangareader.navigation.ReaderDemoRoute
+import io.github.saonte.mangareader.navigation.ReaderRoute
+import io.github.saonte.mangareader.navigation.RulesRoute
+import io.github.saonte.mangareader.navigation.SearchRoute
 import io.github.saonte.mangareader.navigation.SettingsRoute
 import io.github.saonte.mangareader.navigation.ShelfRoute
 import kotlin.reflect.KClass
@@ -65,11 +76,61 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                 startDestination = ShelfRoute,
                 modifier = Modifier.padding(innerPadding),
             ) {
-                composable<ShelfRoute> { ShelfScreen() }
-                composable<HistoryRoute> { HistoryScreen() }
-                composable<BrowseRoute> { BrowseScreen() }
+                composable<ShelfRoute> {
+                    ShelfScreen(
+                        onOpenDetail = { sourceType, cid ->
+                            navController.navigate(DetailRoute(sourceType, cid))
+                        },
+                        onBrowse = { navController.navigateTopLevel(BrowseRoute) },
+                    )
+                }
+                composable<HistoryRoute> {
+                    HistoryScreen(
+                        onOpenDetail = { sourceType, cid ->
+                            navController.navigate(DetailRoute(sourceType, cid))
+                        },
+                    )
+                }
+                composable<BrowseRoute> {
+                    BrowseScreen(
+                        onSearch = { keyword -> navController.navigate(SearchRoute(keyword)) },
+                        onOpenRules = { navController.navigate(RulesRoute) },
+                    )
+                }
+                composable<SearchRoute> { entry ->
+                    val route = entry.toRoute<SearchRoute>()
+                    SearchScreen(
+                        initialKeyword = route.keyword,
+                        onBack = { navController.popBackStack() },
+                        onOpenDetail = { sourceType, cid ->
+                            navController.navigate(DetailRoute(sourceType, cid))
+                        },
+                        onOpenRules = { navController.navigate(RulesRoute) },
+                    )
+                }
+                composable<RulesRoute> {
+                    RulesScreen(onBack = { navController.popBackStack() })
+                }
+                composable<DownloadsRoute> {
+                    DownloadsScreen(onBack = { navController.popBackStack() })
+                }
+                composable<DetailRoute> {
+                    DetailScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenReader = { comicId, chapterPath ->
+                            navController.navigate(ReaderRoute(comicId, chapterPath))
+                        },
+                    )
+                }
+                composable<ReaderRoute> {
+                    ReaderRouteScreen(onExit = { navController.popBackStack() })
+                }
                 composable<SettingsRoute> {
-                    SettingsScreen(onOpenReaderDemo = { navController.navigate(ReaderDemoRoute) })
+                    SettingsScreen(
+                        onOpenReaderDemo = { navController.navigate(ReaderDemoRoute) },
+                        onOpenRules = { navController.navigate(RulesRoute) },
+                        onOpenDownloads = { navController.navigate(DownloadsRoute) },
+                    )
                 }
                 composable<ReaderDemoRoute> {
                     ReaderDemoScreen(onExit = { navController.popBackStack() })

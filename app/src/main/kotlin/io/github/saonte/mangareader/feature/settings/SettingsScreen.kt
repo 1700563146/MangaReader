@@ -34,6 +34,8 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
     onOpenReaderDemo: () -> Unit = {},
+    onOpenRules: () -> Unit = {},
+    onOpenDownloads: () -> Unit = {},
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
 
@@ -43,6 +45,20 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         ScreenHeader(title = stringResource(R.string.nav_me))
+
+        TextButton(
+            onClick = onOpenRules,
+            modifier = Modifier.padding(start = 12.dp, top = 4.dp),
+        ) {
+            Text(stringResource(R.string.rules_manage))
+        }
+
+        TextButton(
+            onClick = onOpenDownloads,
+            modifier = Modifier.padding(start = 12.dp),
+        ) {
+            Text("下载管理")
+        }
 
         SectionTitle(stringResource(R.string.settings_appearance))
         ThemeOptions(selected = themeMode, onSelect = viewModel::setThemeMode)

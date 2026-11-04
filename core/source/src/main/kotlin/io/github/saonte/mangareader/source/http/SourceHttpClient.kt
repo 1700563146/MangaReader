@@ -92,6 +92,56 @@ class SourceHttpClient(
     }
 
     /**
+     * 下载图片：校验 host（hosts ∪ imageHosts）、注入页级 Header，返回原始字节。
+     * 单图上限 32MB，失败抛 SourceFailure。
+     */
+    fun fetchImageBytes(ref: SourceRef, image: io.github.saonte.mangareader.model.ImageRef): ByteArray {
+        val resolved = resolveUrl(image.url, ref.baseUrl)
+        validateUrl(ref, resolved, allowImageHosts = true)
+        val builder = Request.Builder().url(resolved)
+        buildMap {
+            putAll(ref.headers())
+            putAll(image.headers)
+        }.forEach { (key, value) -> builder.header(key, value) }
+        val call = httpClient.newCall(builder.build())
+        call.timeout().timeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        return try {
+            call.execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw SourceFailure(
+                        code = httpErrorCode(response.code),
+                        message = "HTTP ${response.code}",
+                        step = "download",
+                        retryable = response.code == 429 || response.code >= 500,
+                    )
+                }
+                val length = response.body?.contentLength() ?: -1
+                if (length > MAX_IMAGE_BYTES) {
+                    throw SourceFailure(ErrorCode.RESPONSE_TOO_LARGE, "图片超过 32MB", step = "download")
+                }
+                val bytes = response.body?.bytes() ?: ByteArray(0)
+                if (bytes.isEmpty()) {
+                    throw SourceFailure(ErrorCode.IMAGE_FETCH_FAILED, "图片为空", step = "download", retryable = true)
+                }
+                if (bytes.size > MAX_IMAGE_BYTES) {
+                    throw SourceFailure(ErrorCode.RESPONSE_TOO_LARGE, "图片超过 32MB", step = "download")
+                }
+                bytes
+            }
+        } catch (e: SourceFailure) {
+            throw e
+        } catch (e: IOException) {
+            throw SourceFailure(
+                code = ErrorCode.NET_TIMEOUT,
+                message = "图片下载失败：${e.message}",
+                step = "download",
+                retryable = true,
+                cause = e,
+            )
+        }
+    }
+
+    /**
      * 供脚本钩子使用的同步请求：独立 10s 超时，仍走 host 白名单与明文闸门，不做重试。
      */
     fun fetchBlocking(
@@ -292,6 +342,7 @@ class SourceHttpClient(
 
     companion object {
         const val MAX_BYTES = 8L * 1024 * 1024
+        const val MAX_IMAGE_BYTES = 32L * 1024 * 1024
 
         fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)

@@ -19,6 +19,7 @@ interface ComicRepository {
     suspend fun saveProgress(comicId: Long, chapterPath: String, chapterTitle: String, chapterIndex: Int, page: Int)
     suspend fun touchHistory(comicId: Long)
     suspend fun clearHighlight(comicId: Long)
+    suspend fun setUpdate(comicId: Long, updateText: String?, at: Long, highlight: Boolean)
     suspend fun delete(comicId: Long)
 }
 
@@ -92,6 +93,9 @@ class ComicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun clearHighlight(comicId: Long) = dao.clearHighlight(comicId)
+
+    override suspend fun setUpdate(comicId: Long, updateText: String?, at: Long, highlight: Boolean) =
+        dao.setUpdate(comicId, updateText, at, highlight)
 
     override suspend fun delete(comicId: Long) = dao.delete(comicId)
 }

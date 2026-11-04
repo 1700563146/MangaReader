@@ -28,10 +28,17 @@ kotlin {
 
 dependencies {
     api(project(":core:model"))
+    implementation(project(":core:data"))
+    implementation(project(":core:source"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.okhttp)
+
     testImplementation(libs.junit4)
+    testImplementation(libs.truth)
 }

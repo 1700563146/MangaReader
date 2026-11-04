@@ -1,6 +1,7 @@
 package io.github.saonte.mangareader.source
 
 import io.github.saonte.mangareader.model.ErrorCode
+import io.github.saonte.mangareader.model.ImageRef
 import io.github.saonte.mangareader.source.rule.RuleSpec
 
 /**
@@ -71,13 +72,6 @@ data class ImagePage(
     val images: List<ImageRef>,
     val lazy: Boolean = false,
     val total: Int = images.size,
-)
-
-data class ImageRef(
-    val url: String,
-    val urls: List<String> = emptyList(),
-    val lazy: Boolean = false,
-    val headers: Map<String, String> = emptyMap(),
 )
 
 /**

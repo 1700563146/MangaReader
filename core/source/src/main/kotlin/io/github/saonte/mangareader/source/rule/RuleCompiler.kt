@@ -759,7 +759,7 @@ class RuleCompiler(
         val URL_PATTERN = Regex("""^https?://[^\s]+$""")
         val HOST_PATTERN = Regex("""^(?:\*\.)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$""")
         val CONFIG_KEY_PATTERN = Regex("""^[A-Za-z0-9_]+$""")
-        val TEMPLATE_EXPR = Regex("""\$\{([^}]+)}""")
+        val TEMPLATE_EXPR = Regex("""\$\{([^}]+)\}""")
         val ALLOWED_VARS = setOf("base", "keyword", "page", "cid", "chapterPath", "index", "url", "category", "path")
         val SCRIPT_HOOKS = setOf("search", "detail", "chapters", "images", "lazyUrl")
         val PIPE_OPS = setOf(

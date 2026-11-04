@@ -2,6 +2,8 @@ package io.github.saonte.mangareader
 
 import android.app.Application
 import android.util.Log
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import io.github.saonte.mangareader.data.db.MangaDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -11,10 +13,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
-class MangaReaderApp : Application() {
+class MangaReaderApp : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     @Inject
     lateinit var database: MangaDatabase
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
