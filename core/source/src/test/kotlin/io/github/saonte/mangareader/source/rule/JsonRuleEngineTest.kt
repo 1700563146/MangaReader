@@ -82,7 +82,7 @@ class JsonRuleEngineTest {
         }
         server.start()
 
-        val base = server.url("/").toString().trimEnd('/')
+        val base = server.url("/").toString().trimEnd('/').replace("localhost", "127.0.0.1")
         val raw = checkNotNull(javaClass.getResource("/rules/demo-source.json")).readText()
             .replace("https://example.com", base)
             .replace("\"hosts\": [\"example.com\"]", "\"hosts\": [\"127.0.0.1\"]")
