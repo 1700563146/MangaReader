@@ -7,7 +7,7 @@
 [![Platform](https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84.svg)](https://developer.android.com)
 [![Status](https://img.shields.io/badge/status-docs%20phase-orange.svg)](docs/08-roadmap.md)
 
-> **当前状态：M5 规则生态核心完成（验签/撤销/CLI），M6 备份与设置进行中。** 详见 [`docs/08-roadmap.md`](docs/08-roadmap.md)。
+> **当前状态：M6 本地备份/恢复完成，M7 硬化与 v1.0 发布进行中。** 详见 [`docs/08-roadmap.md`](docs/08-roadmap.md)。
 
 ![书架空状态（M0）](docs/screenshots/m0-shelf.png)
 

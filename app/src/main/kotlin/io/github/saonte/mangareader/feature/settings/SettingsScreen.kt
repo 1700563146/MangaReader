@@ -37,6 +37,7 @@ fun SettingsScreen(
     onOpenRules: () -> Unit = {},
     onOpenDownloads: () -> Unit = {},
     onOpenLocal: () -> Unit = {},
+    onOpenBackup: () -> Unit = {},
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
 
@@ -65,6 +66,12 @@ fun SettingsScreen(
             modifier = Modifier.padding(start = 12.dp),
         ) {
             Text("本地漫画")
+        }
+        TextButton(
+            onClick = onOpenBackup,
+            modifier = Modifier.padding(start = 12.dp),
+        ) {
+            Text("备份与恢复")
         }
 
         SectionTitle(stringResource(R.string.settings_appearance))

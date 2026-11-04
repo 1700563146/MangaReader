@@ -33,6 +33,9 @@ data object RulesRoute
 data object DownloadsRoute
 
 @Serializable
+data object BackupRoute
+
+@Serializable
 data object LocalRoute
 
 @Serializable

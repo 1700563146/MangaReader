@@ -31,6 +31,7 @@ import androidx.navigation.toRoute
 import io.github.saonte.mangareader.MainViewModel
 import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.designsystem.theme.MangaReaderTheme
+import io.github.saonte.mangareader.feature.backup.BackupScreen
 import io.github.saonte.mangareader.feature.browse.BrowseScreen
 import io.github.saonte.mangareader.feature.detail.DetailScreen
 import io.github.saonte.mangareader.feature.downloads.DownloadsScreen
@@ -44,6 +45,7 @@ import io.github.saonte.mangareader.feature.search.SearchScreen
 import io.github.saonte.mangareader.feature.settings.SettingsScreen
 import io.github.saonte.mangareader.feature.shelf.ShelfScreen
 import io.github.saonte.mangareader.model.ThemeMode
+import io.github.saonte.mangareader.navigation.BackupRoute
 import io.github.saonte.mangareader.navigation.BrowseRoute
 import io.github.saonte.mangareader.navigation.HistoryRoute
 import io.github.saonte.mangareader.navigation.DetailRoute
@@ -118,6 +120,9 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                 composable<DownloadsRoute> {
                     DownloadsScreen(onBack = { navController.popBackStack() })
                 }
+                composable<BackupRoute> {
+                    BackupScreen(onBack = { navController.popBackStack() })
+                }
                 composable<LocalRoute> {
                     LocalScreen(
                         onBack = { navController.popBackStack() },
@@ -149,6 +154,7 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                         onOpenRules = { navController.navigate(RulesRoute) },
                         onOpenDownloads = { navController.navigate(DownloadsRoute) },
                         onOpenLocal = { navController.navigate(LocalRoute) },
+                        onOpenBackup = { navController.navigate(BackupRoute) },
                     )
                 }
                 composable<ReaderDemoRoute> {

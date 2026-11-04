@@ -30,6 +30,9 @@ interface SourceDao {
     @Query("SELECT * FROM source WHERE enabled = 1 AND health != 2 ORDER BY sort ASC, type ASC")
     fun observeEnabled(): Flow<List<SourceEntity>>
 
+    @Query("SELECT * FROM source ORDER BY type ASC")
+    suspend fun listAll(): List<SourceEntity>
+
     @Query("SELECT * FROM source WHERE type = :type LIMIT 1")
     suspend fun find(type: Long): SourceEntity?
 
@@ -109,6 +112,15 @@ interface ComicDao {
 
     @Query("SELECT * FROM comic WHERE local = 1 AND cid = :cid LIMIT 1")
     suspend fun findLocal(cid: String): ComicEntity?
+
+    @Query("SELECT * FROM comic ORDER BY id ASC")
+    suspend fun listAll(): List<ComicEntity>
+
+    @Upsert
+    suspend fun upsert(entity: ComicEntity): Long
+
+    @Query("DELETE FROM comic")
+    suspend fun deleteAll()
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIgnore(entity: ComicEntity): Long
@@ -216,6 +228,12 @@ interface TagDao {
     @Query("SELECT * FROM tag WHERE name = :name LIMIT 1")
     suspend fun findByName(name: String): TagEntity?
 
+    @Query("SELECT * FROM tag ORDER BY id ASC")
+    suspend fun listAll(): List<TagEntity>
+
+    @Query("DELETE FROM tag")
+    suspend fun deleteAll()
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: TagEntity): Long
 
@@ -245,6 +263,12 @@ interface TagRefDao {
 
     @Query("SELECT tag_id FROM tag_ref WHERE comic_id = :comicId")
     suspend fun tagsOf(comicId: Long): List<Long>
+
+    @Query("SELECT * FROM tag_ref")
+    suspend fun listAll(): List<TagRefEntity>
+
+    @Query("DELETE FROM tag_ref WHERE comic_id = :comicId")
+    suspend fun unlinkComic(comicId: Long)
 }
 
 @Dao
