@@ -17,9 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.designsystem.component.EmptyState
 import io.github.saonte.mangareader.storage.DownloadState
 import io.github.saonte.mangareader.storage.DownloadTask
@@ -34,14 +36,14 @@ fun DownloadsScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text("返回") }
-            ScreenHeader(title = "下载管理", modifier = Modifier.weight(1f))
+            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.action_back)) }
+            ScreenHeader(title = stringResource(R.string.downloads_title), modifier = Modifier.weight(1f))
         }
 
         if (tasks.isEmpty()) {
             EmptyState(
-                title = "没有下载任务",
-                body = "在漫画详情页点击章节右侧的「下载」即可离线保存。",
+                title = stringResource(R.string.downloads_empty_title),
+                body = stringResource(R.string.downloads_empty_body),
             )
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -74,12 +76,12 @@ private fun DownloadRow(
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = when (task.state) {
-                DownloadState.QUEUED -> "排队中"
-                DownloadState.RUNNING -> "下载中 ${task.done}/${task.total}"
-                DownloadState.PAUSED -> "已暂停"
-                DownloadState.COMPLETED -> "已完成"
-                DownloadState.FAILED -> "失败 ${task.errorCode.orEmpty()}"
-                DownloadState.CANCELLED -> "已取消"
+                DownloadState.QUEUED -> stringResource(R.string.downloads_queued)
+                DownloadState.RUNNING -> stringResource(R.string.downloads_running, task.done, task.total)
+                DownloadState.PAUSED -> stringResource(R.string.downloads_paused)
+                DownloadState.COMPLETED -> stringResource(R.string.downloads_completed)
+                DownloadState.FAILED -> stringResource(R.string.downloads_failed, task.errorCode.orEmpty())
+                DownloadState.CANCELLED -> stringResource(R.string.downloads_cancelled)
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -96,14 +98,14 @@ private fun DownloadRow(
             Spacer(modifier = Modifier.weight(1f))
             when (task.state) {
                 DownloadState.RUNNING, DownloadState.QUEUED ->
-                    TextButton(onClick = onPause) { Text("暂停") }
+                    TextButton(onClick = onPause) { Text(stringResource(R.string.downloads_pause)) }
 
                 DownloadState.PAUSED, DownloadState.FAILED ->
-                    TextButton(onClick = onResume) { Text("继续") }
+                    TextButton(onClick = onResume) { Text(stringResource(R.string.action_resume)) }
 
                 else -> Unit
             }
-            TextButton(onClick = onCancel) { Text("删除") }
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.action_delete)) }
         }
     }
 }

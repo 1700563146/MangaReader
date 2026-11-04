@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.BuildConfig
 import io.github.saonte.mangareader.designsystem.component.EmptyState
 import io.github.saonte.mangareader.model.Comic
@@ -63,8 +65,8 @@ fun LocalScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text("返回") }
-            ScreenHeader(title = "本地漫画", modifier = Modifier.weight(1f))
+            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.action_back)) }
+            ScreenHeader(title = stringResource(R.string.local_title), modifier = Modifier.weight(1f))
         }
 
         Row(
@@ -74,9 +76,9 @@ fun LocalScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Button(onClick = { picker.launch(null) }) { Text("添加目录") }
+            Button(onClick = { picker.launch(null) }) { Text(stringResource(R.string.local_add_dir)) }
             Button(enabled = !scanning && roots.isNotEmpty(), onClick = viewModel::scan) {
-                Text(if (scanning) "扫描中…" else "扫描全部")
+                Text(if (scanning) stringResource(R.string.local_scanning) else stringResource(R.string.local_scan_all))
             }
         }
 
@@ -85,7 +87,7 @@ fun LocalScreen(
                 onClick = { viewModel.seedDemo(context) },
                 modifier = Modifier.padding(horizontal = 12.dp),
             ) {
-                Text("生成本地演示目录（Debug）")
+                Text(stringResource(R.string.local_seed_demo))
             }
         }
 
@@ -102,13 +104,13 @@ fun LocalScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = viewModel::dismissMessage) { Text("知道了") }
+                TextButton(onClick = viewModel::dismissMessage) { Text(stringResource(R.string.action_got_it)) }
             }
         }
 
         if (roots.isNotEmpty()) {
             Text(
-                text = "扫描目录",
+                text = stringResource(R.string.local_scan_dirs),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
             )
@@ -122,12 +124,12 @@ fun LocalScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(root.label, style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            text = "上次扫描：${root.lastCount} 部",
+                            text = stringResource(R.string.local_last_scan, root.lastCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    TextButton(onClick = { viewModel.removeRoot(root.id) }) { Text("移除") }
+                    TextButton(onClick = { viewModel.removeRoot(root.id) }) { Text(stringResource(R.string.action_remove)) }
                 }
             }
             HorizontalDivider()
@@ -135,8 +137,8 @@ fun LocalScreen(
 
         if (comics.isEmpty()) {
             EmptyState(
-                title = "还没有本地漫画",
-                body = "点击「添加目录」，选择存放图片的文件夹（每个漫画一个子目录，章节再分子目录）。ZIP/CBZ 支持顺延。",
+                title = stringResource(R.string.local_empty_title),
+                body = stringResource(R.string.local_empty_body),
             )
         } else {
             LazyVerticalGrid(
@@ -178,6 +180,6 @@ private fun LocalComicItem(comic: Comic, onClick: () -> Unit, onDelete: () -> Un
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 4.dp),
         )
-        TextButton(onClick = onDelete) { Text("移除", style = MaterialTheme.typography.labelSmall) }
+        TextButton(onClick = onDelete) { Text(stringResource(R.string.action_remove), style = MaterialTheme.typography.labelSmall) }
     }
 }

@@ -65,7 +65,7 @@ fun BrowseScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "已启用 ${sources.size} 个源",
+                text = stringResource(R.string.browse_sources_enabled, sources.size),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),

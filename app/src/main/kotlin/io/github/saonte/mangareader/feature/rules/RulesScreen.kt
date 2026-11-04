@@ -51,7 +51,7 @@ fun RulesScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) {
-                Text("返回")
+                Text(stringResource(R.string.action_back))
             }
             ScreenHeader(
                 title = stringResource(R.string.rules_manage),
@@ -75,7 +75,7 @@ fun RulesScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = viewModel::dismissMessage) { Text("知道了") }
+                TextButton(onClick = viewModel::dismissMessage) { Text(stringResource(R.string.action_got_it)) }
             }
         }
 
@@ -132,13 +132,13 @@ private fun SourceRow(
                     append(" · v")
                     append(source.version)
                     if (revoked) {
-                        append(" · 已撤销")
+                        append(stringResource(R.string.rules_revoked_suffix))
                     } else if (source.health != SourceHealth.HEALTHY) {
                         append(" · ")
-                        append(if (source.health == SourceHealth.DEGRADED) "降级" else "已禁用")
+                        append(if (source.health == SourceHealth.DEGRADED) stringResource(R.string.rules_degraded) else stringResource(R.string.rules_disabled))
                     }
                     if (source.failStreak > 0) {
-                        append(" · 连续失败 ")
+                        append(stringResource(R.string.rules_fail_streak))
                         append(source.failStreak)
                     }
                 },
@@ -147,7 +147,7 @@ private fun SourceRow(
             )
             if (source.lastErrorCode != null) {
                 Text(
-                    text = "最近错误：${source.lastErrorCode}",
+                    text = stringResource(R.string.rules_last_error, source.lastErrorCode.orEmpty()),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.error,
                 )

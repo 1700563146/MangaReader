@@ -62,7 +62,7 @@ fun SearchScreen(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onBack) { Text("返回") }
+            TextButton(onClick = onBack) { Text(stringResource(R.string.action_back)) }
             OutlinedTextField(
                 value = state.keyword,
                 onValueChange = viewModel::onKeywordChange,
@@ -142,7 +142,7 @@ fun SearchScreen(
                                         CircularProgressIndicator(modifier = Modifier.size(20.dp))
                                     } else {
                                         TextButton(onClick = { viewModel.loadMore(result.source) }) {
-                                            Text("加载更多")
+                                            Text(stringResource(R.string.search_load_more))
                                         }
                                     }
                                 }
@@ -151,7 +151,7 @@ fun SearchScreen(
                         if (result.items.isEmpty()) {
                             item(key = "empty-${result.source.type}") {
                                 Text(
-                                    text = "该源没有结果",
+                                    text = stringResource(R.string.search_no_result),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
@@ -168,9 +168,9 @@ fun SearchScreen(
 @Composable
 private fun SourceHeader(result: SourceResult) {
     val subtitle = when {
-        result.failure != null -> "失败"
-        result.loading -> "搜索中…"
-        else -> "${result.items.size} 条" + if (result.hasNext) " · 还有更多" else ""
+        result.failure != null -> stringResource(R.string.search_failed)
+        result.loading -> stringResource(R.string.search_running)
+        else -> stringResource(R.string.search_count, result.items.size) + if (result.hasNext) stringResource(R.string.search_more_suffix) else ""
     }
     Row(
         modifier = Modifier
@@ -225,7 +225,7 @@ private fun SearchResultRow(item: ComicSummary, onClick: () -> Unit) {
                 text = listOfNotNull(
                     item.author,
                     item.update,
-                    item.finish?.let { if (it) "完结" else "连载" },
+                    item.finish?.let { if (it) stringResource(R.string.status_finished) else stringResource(R.string.status_ongoing) },
                 ).joinToString(" · "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

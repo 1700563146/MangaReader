@@ -67,25 +67,25 @@ fun SettingsScreen(
             onClick = onOpenDownloads,
             modifier = Modifier.padding(start = 12.dp),
         ) {
-            Text("下载管理")
+            Text(stringResource(R.string.downloads_title))
         }
         TextButton(
             onClick = onOpenLocal,
             modifier = Modifier.padding(start = 12.dp),
         ) {
-            Text("本地漫画")
+            Text(stringResource(R.string.local_title))
         }
         TextButton(
             onClick = onOpenBackup,
             modifier = Modifier.padding(start = 12.dp),
         ) {
-            Text("备份与恢复")
+            Text(stringResource(R.string.backup_title))
         }
 
         SectionTitle(stringResource(R.string.settings_appearance))
         ThemeOptions(selected = themeMode, onSelect = viewModel::setThemeMode)
 
-        SectionTitle("阅读")
+        SectionTitle(stringResource(R.string.settings_reading))
         ReaderModeOptions(selected = readerMode, onSelect = viewModel::setReaderMode)
         Row(
             modifier = Modifier
@@ -94,9 +94,9 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("双页模式", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.settings_double_page), style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    "仅横向翻页生效",
+                    stringResource(R.string.settings_double_page_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -107,19 +107,19 @@ fun SettingsScreen(
             )
         }
 
-        SectionTitle("点击区动作")
-        TapZoneRow("左侧", tapConfig.left) { viewModel.setTapAction("LEFT", it) }
-        TapZoneRow("中间", tapConfig.center) { viewModel.setTapAction("CENTER", it) }
-        TapZoneRow("右侧", tapConfig.right) { viewModel.setTapAction("RIGHT", it) }
+        SectionTitle(stringResource(R.string.settings_tap_zones))
+        TapZoneRow(stringResource(R.string.tap_zone_left), tapConfig.left) { viewModel.setTapAction("LEFT", it) }
+        TapZoneRow(stringResource(R.string.tap_zone_center), tapConfig.center) { viewModel.setTapAction("CENTER", it) }
+        TapZoneRow(stringResource(R.string.tap_zone_right), tapConfig.right) { viewModel.setTapAction("RIGHT", it) }
 
         if (BuildConfig.DEBUG) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            SectionTitle("开发者")
+            SectionTitle(stringResource(R.string.settings_developer))
             TextButton(
                 onClick = onOpenReaderDemo,
                 modifier = Modifier.padding(horizontal = 12.dp),
             ) {
-                Text("阅读器演示（本地占位图）")
+                Text(stringResource(R.string.settings_reader_demo))
             }
         }
 
@@ -152,9 +152,9 @@ private fun SectionTitle(text: String) {
 @Composable
 private fun TapZoneRow(label: String, selected: TapAction, onSelect: (TapAction) -> Unit) {
     val options = listOf(
-        TapAction.PREV to "上一页",
-        TapAction.NEXT to "下一页",
-        TapAction.MENU to "菜单",
+        TapAction.PREV to stringResource(R.string.tap_action_prev),
+        TapAction.NEXT to stringResource(R.string.tap_action_next),
+        TapAction.MENU to stringResource(R.string.tap_action_menu),
     )
     Row(
         modifier = Modifier
@@ -183,10 +183,10 @@ private fun TapZoneRow(label: String, selected: TapAction, onSelect: (TapAction)
 @Composable
 private fun ReaderModeOptions(selected: ReadMode, onSelect: (ReadMode) -> Unit) {
     val options = listOf(
-        ReadMode.PAGED_LTR to "左 → 右",
-        ReadMode.PAGED_RTL to "右 → 左",
-        ReadMode.PAGED_TTB to "上下翻页",
-        ReadMode.WEBTOON to "条漫（连续滚动）",
+        ReadMode.PAGED_LTR to stringResource(R.string.reader_mode_ltr),
+        ReadMode.PAGED_RTL to stringResource(R.string.reader_mode_rtl),
+        ReadMode.PAGED_TTB to stringResource(R.string.reader_mode_ttb),
+        ReadMode.WEBTOON to stringResource(R.string.reader_mode_webtoon),
     )
     Column(modifier = Modifier.selectableGroup()) {
         options.forEach { (mode, label) ->

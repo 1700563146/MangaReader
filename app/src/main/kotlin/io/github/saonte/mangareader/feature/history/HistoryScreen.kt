@@ -54,16 +54,16 @@ fun HistoryScreen(
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text("清空阅读历史？") },
-            text = { Text("仅清除历史记录，不影响收藏与已下载章节。") },
+            title = { Text(stringResource(R.string.history_clear_title)) },
+            text = { Text(stringResource(R.string.history_clear_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmClear = false
                     viewModel.clearAll()
-                }) { Text("清空") }
+                }) { Text(stringResource(R.string.action_clear)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmClear = false }) { Text("取消") }
+                TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -80,7 +80,7 @@ fun HistoryScreen(
             TextButton(
                 enabled = history.isNotEmpty(),
                 onClick = { confirmClear = true },
-            ) { Text("清空") }
+            ) { Text(stringResource(R.string.action_clear)) }
         }
         message?.let {
             Row(
@@ -95,7 +95,7 @@ fun HistoryScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = viewModel::dismissMessage) { Text("知道了") }
+                TextButton(onClick = viewModel::dismissMessage) { Text(stringResource(R.string.action_got_it)) }
             }
         }
         if (history.isEmpty()) {
@@ -145,7 +145,7 @@ private fun HistoryRow(comic: Comic, onClick: () -> Unit, onDelete: () -> Unit) 
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = listOfNotNull(comic.lastChapterTitle, comic.lastPage.takeIf { it > 0 }?.let { "第 ${it + 1} 页" })
+                text = listOfNotNull(comic.lastChapterTitle, comic.lastPage.takeIf { it > 0 }?.let { stringResource(R.string.history_page, it + 1) })
                     .joinToString(" · "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -161,7 +161,7 @@ private fun HistoryRow(comic: Comic, onClick: () -> Unit, onDelete: () -> Unit) 
             )
         }
         Spacer(modifier = Modifier.width(4.dp))
-        TextButton(onClick = onDelete) { Text("删除", style = MaterialTheme.typography.labelSmall) }
+        TextButton(onClick = onDelete) { Text(stringResource(R.string.action_delete), style = MaterialTheme.typography.labelSmall) }
     }
 }
 

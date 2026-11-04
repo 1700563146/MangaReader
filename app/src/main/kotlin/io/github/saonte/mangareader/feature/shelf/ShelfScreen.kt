@@ -60,17 +60,17 @@ fun ShelfScreen(
                 enabled = !checking && shelf.isNotEmpty(),
                 onClick = viewModel::checkUpdates,
             ) {
-                Text(if (checking) "检查中…" else "检查更新")
+                Text(if (checking) stringResource(R.string.shelf_checking) else stringResource(R.string.shelf_check_updates))
             }
             if (selectionMode) {
-                TextButton(onClick = viewModel::clearSelection) { Text("取消") }
-                TextButton(onClick = { viewModel.selectAll(shelf) }) { Text("全选") }
+                TextButton(onClick = viewModel::clearSelection) { Text(stringResource(R.string.action_cancel)) }
+                TextButton(onClick = { viewModel.selectAll(shelf) }) { Text(stringResource(R.string.action_select_all)) }
                 TextButton(onClick = viewModel::unfavoriteSelected) {
-                    Text("取消收藏(${selection.size})")
+                    Text(stringResource(R.string.shelf_unfavorite_count, selection.size))
                 }
             } else {
                 TextButton(onClick = viewModel::toggleUpdatesOnly) {
-                    Text(if (updatesOnly) "全部" else "仅更新")
+                    Text(if (updatesOnly) stringResource(R.string.shelf_all) else stringResource(R.string.shelf_updates_only))
                 }
             }
         }
@@ -87,7 +87,7 @@ fun ShelfScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = viewModel::dismissMessage) { Text("知道了") }
+                TextButton(onClick = viewModel::dismissMessage) { Text(stringResource(R.string.action_got_it)) }
             }
         }
         val visibleShelf = if (updatesOnly) shelf.filter { it.highlight } else shelf
@@ -100,8 +100,8 @@ fun ShelfScreen(
             )
         } else if (visibleShelf.isEmpty()) {
             EmptyState(
-                title = "暂无更新",
-                body = "点击「检查更新」后，有新章节的漫画会出现在这里。",
+                title = stringResource(R.string.shelf_no_updates_title),
+                body = stringResource(R.string.shelf_no_updates_body),
             )
         } else {
             LazyVerticalGrid(

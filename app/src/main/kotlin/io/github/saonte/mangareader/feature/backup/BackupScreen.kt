@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.data.backup.ImportMode
 import io.github.saonte.mangareader.ui.components.ScreenHeader
 import java.text.SimpleDateFormat
@@ -51,13 +53,13 @@ fun BackupScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text("返回") }
-            ScreenHeader(title = "备份与恢复", modifier = Modifier.weight(1f))
+            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.action_back)) }
+            ScreenHeader(title = stringResource(R.string.backup_title), modifier = Modifier.weight(1f))
         }
 
         Text(
-            text = "备份包含：规则包、收藏、阅读进度、章节已读状态、标签与主题设置。\n" +
-                "不包含：漫画图片、下载文件、Cookie 与 WebDAV 密码。",
+            text = stringResource(R.string.backup_included) + "\n" +
+                stringResource(R.string.backup_excluded),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 24.dp),
@@ -68,26 +70,26 @@ fun BackupScreen(
             enabled = !state.busy,
             onClick = { exportLauncher.launch(suggestedName) },
             modifier = Modifier.padding(horizontal = 24.dp),
-        ) { Text("导出备份") }
+        ) { Text(stringResource(R.string.backup_export)) }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
         Text(
-            text = "导入方式",
+            text = stringResource(R.string.backup_import_mode),
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
         )
         Column(modifier = Modifier.selectableGroup()) {
-            ModeRow("合并（推荐）", "按规则 id + cid 合并，进度取较新", ImportMode.MERGE, state.mode, viewModel::setMode)
-            ModeRow("替换", "清空收藏与标签后导入（规则保留并合并）", ImportMode.REPLACE, state.mode, viewModel::setMode)
-            ModeRow("仅规则", "只恢复规则包，不动书架与进度", ImportMode.RULES_ONLY, state.mode, viewModel::setMode)
+            ModeRow(stringResource(R.string.backup_mode_merge), stringResource(R.string.backup_mode_merge_desc), ImportMode.MERGE, state.mode, viewModel::setMode)
+            ModeRow(stringResource(R.string.backup_mode_replace), stringResource(R.string.backup_mode_replace_desc), ImportMode.REPLACE, state.mode, viewModel::setMode)
+            ModeRow(stringResource(R.string.backup_mode_rules), stringResource(R.string.backup_mode_rules_desc), ImportMode.RULES_ONLY, state.mode, viewModel::setMode)
         }
 
         Button(
             enabled = !state.busy,
             onClick = { importLauncher.launch(arrayOf("application/zip", "application/octet-stream")) },
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-        ) { Text("导入备份") }
+        ) { Text(stringResource(R.string.backup_import)) }
 
         if (state.busy) {
             Row(
@@ -96,7 +98,7 @@ fun BackupScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 CircularProgressIndicator()
-                Text("处理中…", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.backup_busy), style = MaterialTheme.typography.bodyMedium)
             }
         }
 
@@ -111,7 +113,7 @@ fun BackupScreen(
                         MaterialTheme.colorScheme.primary
                     },
                 )
-                TextButton(onClick = viewModel::dismissMessage) { Text("知道了") }
+                TextButton(onClick = viewModel::dismissMessage) { Text(stringResource(R.string.action_got_it)) }
             }
         }
     }

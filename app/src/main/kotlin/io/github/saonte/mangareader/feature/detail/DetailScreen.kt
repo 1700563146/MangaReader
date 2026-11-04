@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.model.Chapter
 import io.github.saonte.mangareader.storage.DownloadState
 import io.github.saonte.mangareader.storage.DownloadTask
@@ -52,17 +54,17 @@ fun DetailScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text("返回") }
+            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.action_back)) }
             Spacer(modifier = Modifier.weight(1f))
             if (comic != null) {
                 TextButton(onClick = viewModel::toggleFavorite) {
-                    Text(if (state.favorite) "已收藏" else "收藏")
+                    Text(if (state.favorite) stringResource(R.string.detail_favorited) else stringResource(R.string.detail_favorite))
                 }
             }
         }
 
         if (state.loading) {
-            ScreenHeader(title = "加载中…")
+            ScreenHeader(title = stringResource(R.string.detail_loading))
             return@Column
         }
 
@@ -73,19 +75,19 @@ fun DetailScreen(
             horizontalArrangement = Arrangement.End,
         ) {
             if (state.selectionMode) {
-                TextButton(onClick = viewModel::clearChapterSelection) { Text("取消") }
+                TextButton(onClick = viewModel::clearChapterSelection) { Text(stringResource(R.string.action_cancel)) }
                 TextButton(onClick = viewModel::downloadSelected) {
-                    Text("下载(${state.selectedChapters.size})")
+                    Text(stringResource(R.string.detail_download_count, state.selectedChapters.size))
                 }
             } else {
                 TextButton(onClick = viewModel::toggleChapterOrder) {
-                    Text(if (state.chaptersDescending) "正序" else "倒序")
+                    Text(if (state.chaptersDescending) stringResource(R.string.detail_order_asc) else stringResource(R.string.detail_order_desc))
                 }
             }
             TextButton(
                 enabled = state.chapters.isNotEmpty(),
                 onClick = viewModel::downloadAll,
-            ) { Text("下载全部") }
+            ) { Text(stringResource(R.string.detail_download_all)) }
         }
 
         state.message?.let { message ->
@@ -100,7 +102,7 @@ fun DetailScreen(
         state.error?.let { error ->
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(error, color = MaterialTheme.colorScheme.error)
-                TextButton(onClick = viewModel::load) { Text("重试") }
+                TextButton(onClick = viewModel::load) { Text(stringResource(R.string.action_retry_short)) }
             }
             return@Column
         }
@@ -148,7 +150,7 @@ fun DetailScreen(
                     enabled = state.chapters.isNotEmpty(),
                     onClick = { viewModel.continueReading(onOpenReader) },
                 ) {
-                    Text(if (comic.lastChapterPath != null) "继续阅读" else "开始阅读")
+                    Text(if (comic.lastChapterPath != null) stringResource(R.string.detail_continue_reading) else stringResource(R.string.detail_start_reading))
                 }
             }
         }
@@ -171,12 +173,12 @@ fun DetailScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "章节（${state.chapters.size}）",
+                text = stringResource(R.string.detail_chapters_count, state.chapters.size),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = if (comic.lastChapterTitle != null) "上次：${comic.lastChapterTitle}" else "",
+                text = if (comic.lastChapterTitle != null) stringResource(R.string.detail_last_chapter, comic.lastChapterTitle.orEmpty()) else "",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -203,7 +205,7 @@ fun DetailScreen(
                 HorizontalDivider()
             }
             if (state.chapters.isEmpty()) {
-                item { Text("没有解析到章节，源可能已变更", modifier = Modifier.padding(24.dp)) }
+                item { Text(stringResource(R.string.detail_no_chapters), modifier = Modifier.padding(24.dp)) }
             }
         }
     }
@@ -242,7 +244,7 @@ private fun ChapterRow(
         }
         if (chapter.readAt != null) {
             Text(
-                text = "已读",
+                text = stringResource(R.string.detail_read),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -251,14 +253,14 @@ private fun ChapterRow(
         TextButton(onClick = onDownloadAction) {
             Text(
                 text = when (download?.state) {
-                    null -> "下载"
-                    DownloadState.COMPLETED -> "已下载"
+                    null -> stringResource(R.string.detail_download)
+                    DownloadState.COMPLETED -> stringResource(R.string.detail_downloaded)
                     DownloadState.RUNNING, DownloadState.QUEUED ->
-                        if (download.total > 0) "${download.done}/${download.total}" else "下载中"
+                        if (download.total > 0) "${download.done}/${download.total}" else stringResource(R.string.detail_downloading)
 
-                    DownloadState.PAUSED -> "继续"
-                    DownloadState.FAILED -> "重试"
-                    DownloadState.CANCELLED -> "重新下载"
+                    DownloadState.PAUSED -> stringResource(R.string.action_resume)
+                    DownloadState.FAILED -> stringResource(R.string.action_retry_short)
+                    DownloadState.CANCELLED -> stringResource(R.string.detail_redownload)
                 },
                 style = MaterialTheme.typography.labelMedium,
             )
