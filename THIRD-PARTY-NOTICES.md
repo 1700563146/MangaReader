@@ -18,7 +18,22 @@
 | jsoup | MIT | HTML 解析 | |
 | Rhino | MPL-2.0 | JS 沙箱（规则钩子） | 以库形式使用，不修改源码 |
 | Coil | Apache-2.0 | 图片加载 | |
+| EdDSA-Java（net.i2p.crypto:eddsa 0.3.0） | CC0-1.0 | 规则索引 Ed25519 验签 | 公共领域贡献 |
 | kotlinx-datetime（如引入） | Apache-2.0 | 时间处理 | |
+
+### 版本锁定（v1.0.0）
+
+| 组件 | 版本 |
+| --- | --- |
+| Kotlin | 2.2.20 |
+| kotlinx-coroutines / serialization | 1.10.2 / 1.9.0 |
+| Compose BOM | 2025.11.01 |
+| Room / WorkManager / DataStore / Paging | 2.8.3 / 2.10.5 / 1.1.7 / 3.4.2 |
+| Hilt / androidx.hilt | 2.57.2 / 1.3.0 |
+| Coil | 3.3.0 |
+| OkHttp | 4.12.0 |
+| jsoup / Rhino / eddsa | 1.22.1 / 1.7.15 / 0.3.0 |
+
 
 Android 系统组件（`android.*` / `androidx.*` 中属于平台的部分）按其各自许可证分发；AOSP 部分为 Apache-2.0。
 

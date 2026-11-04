@@ -25,12 +25,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import io.github.saonte.mangareader.model.ImageRef
 import io.github.saonte.mangareader.reader.PageSource
+import io.github.saonte.mangareader.reader.R
 
 enum class TapZone { LEFT, CENTER, RIGHT }
 
@@ -51,6 +55,7 @@ fun PageImage(
     onZoomChanged: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
+    val pageDescription = stringResource(R.string.reader_page_description, index + 1)
     val zoom = remember(pageSource, index) { ZoomState() }
     var image by remember(pageSource, index) { mutableStateOf<ImageRef?>(null) }
     var error by remember(pageSource, index) { mutableStateOf<String?>(null) }
@@ -104,9 +109,10 @@ fun PageImage(
 
             else -> AsyncImage(
                 model = imageRequest(context, loaded),
-                contentDescription = "第 ${index + 1} 页",
+                contentDescription = pageDescription,
                 modifier = Modifier
                     .fillMaxSize()
+                    .semantics { contentDescription = pageDescription }
                     .graphicsLayer {
                         scaleX = zoom.scale
                         scaleY = zoom.scale
@@ -120,7 +126,7 @@ fun PageImage(
                     onLoaded(result.width, result.height)
                 },
                 onError = { state: AsyncImagePainter.State.Error ->
-                    error = state.result.throwable.message ?: "图片解码失败"
+                    error = state.result.throwable.message
                 },
             )
         }

@@ -16,9 +16,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.saonte.mangareader.model.ReadMode
+import io.github.saonte.mangareader.reader.R
 import io.github.saonte.mangareader.reader.ReaderUiState
 
 @Composable
@@ -44,7 +46,7 @@ fun ReaderMenu(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = state.chapterTitle.ifBlank { "阅读" },
+                    text = state.chapterTitle.ifBlank { stringResource(R.string.reader_default_title) },
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
                 )
@@ -63,7 +65,7 @@ fun ReaderMenu(
                     .padding(top = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("亮度", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.reader_brightness), style = MaterialTheme.typography.labelMedium)
                 Slider(
                     value = state.brightness,
                     onValueChange = onBrightness,
@@ -87,10 +89,10 @@ fun ReaderMenu(
                 TextButton(onClick = onToggleMode) {
                     Text(
                         text = when (state.mode) {
-                            ReadMode.PAGED_LTR -> "左→右"
-                            ReadMode.PAGED_RTL -> "右→左"
-                            ReadMode.PAGED_TTB -> "上下"
-                            ReadMode.WEBTOON -> "条漫"
+                            ReadMode.PAGED_LTR -> stringResource(R.string.reader_mode_ltr)
+                            ReadMode.PAGED_RTL -> stringResource(R.string.reader_mode_rtl)
+                            ReadMode.PAGED_TTB -> stringResource(R.string.reader_mode_ttb)
+                            ReadMode.WEBTOON -> stringResource(R.string.reader_mode_webtoon)
                         },
                         color = Color.White,
                     )
@@ -98,7 +100,11 @@ fun ReaderMenu(
                 if (state.mode != ReadMode.WEBTOON && state.mode != ReadMode.PAGED_TTB) {
                     TextButton(onClick = onToggleDoublePage) {
                         Text(
-                            text = if (state.doublePage) "单页" else "双页",
+                            text = if (state.doublePage) {
+                                stringResource(R.string.reader_double_page_on)
+                            } else {
+                                stringResource(R.string.reader_double_page_off)
+                            },
                             color = Color.White,
                         )
                     }
@@ -106,19 +112,27 @@ fun ReaderMenu(
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(onClick = onToggleAutoCrop) {
                     Text(
-                        text = if (state.autoCrop) "裁剪开" else "裁剪关",
+                        text = if (state.autoCrop) {
+                            stringResource(R.string.reader_crop_on)
+                        } else {
+                            stringResource(R.string.reader_crop_off)
+                        },
                         color = Color.White,
                     )
                 }
                 TextButton(onClick = onToggleNightFilter) {
                     Text(
-                        text = if (state.nightFilter) "夜间开" else "夜间关",
+                        text = if (state.nightFilter) {
+                            stringResource(R.string.reader_night_on)
+                        } else {
+                            stringResource(R.string.reader_night_off)
+                        },
                         color = Color.White,
                     )
                 }
-                TextButton(onClick = onExit) { Text("退出", color = Color.White) }
+                TextButton(onClick = onExit) { Text(stringResource(R.string.reader_exit), color = Color.White) }
                 Spacer(modifier = Modifier.width(4.dp))
-                TextButton(onClick = onClose) { Text("收起", color = Color.White) }
+                TextButton(onClick = onClose) { Text(stringResource(R.string.reader_close), color = Color.White) }
             }
         }
     }

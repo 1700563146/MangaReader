@@ -39,6 +39,13 @@
 - 章节长按多选批量下载（F-305）。
 - 上次章节被源删除时按索引回退并提示（F-303）。
 
+### Accessibility & security
+
+- 阅读器文案抽到 `core:reader` 资源（zh / en / zh-rTW），页面图片补充语义描述。
+- `dataExtractionRules`：设备迁移保留规则/书架/进度/设置，排除下载图片与缓存。
+- 移除未使用字符串，lint 警告 53 → 47（0 error）。
+- 新增 `docs/reports/m7-security.md` 安全审查清单与 `NOTICE` 文件。
+
 ### i18n
 
 - 界面文案抽离到 `strings.xml`：书架、历史、下载、搜索、详情、设置、规则、本地、备份、阅读菜单。

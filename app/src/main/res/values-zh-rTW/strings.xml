@@ -111,15 +111,12 @@
     <string name="browse_empty_title">從規則開始</string>
     <string name="browse_empty_body">在「我的 → 規則管理」匯入 JSON 規則，然後回來搜尋。
 範例規則見倉庫 docs/examples。</string>
-    <string name="me_title">我的</string>
     <string name="settings_appearance">外觀</string>
-    <string name="settings_theme">主題</string>
     <string name="theme_system">跟隨系統</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
     <string name="settings_about">關於</string>
     <string name="settings_version">版本</string>
-    <string name="settings_legal">授權與免責聲明</string>
     <string name="settings_legal_hint">GPL-3.0 · 不提供任何漫畫內容</string>
     <string name="action_retry">重試</string>
     <string name="search_hint">搜尋漫畫</string>
@@ -135,5 +132,4 @@
     <string name="rules_import_hint">貼上規則 JSON</string>
     <string name="rules_empty_title">還沒有匯入規則</string>
     <string name="rules_empty_body">規則是 JSON 資料檔，描述一個站點如何搜尋、解析詳情與圖片。本應用不內建任何來源。</string>
-    <string name="placeholder_m0">M0 骨架：功能將在後續里程碑接入</string>
 </resources>

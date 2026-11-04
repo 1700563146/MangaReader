@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reader_default_title">閱讀</string>
+    <string name="reader_brightness">亮度</string>
+    <string name="reader_mode_ltr">左→右</string>
+    <string name="reader_mode_rtl">右→左</string>
+    <string name="reader_mode_ttb">上下</string>
+    <string name="reader_mode_webtoon">條漫</string>
+    <string name="reader_double_page_on">單頁</string>
+    <string name="reader_double_page_off">雙頁</string>
+    <string name="reader_crop_on">裁剪開</string>
+    <string name="reader_crop_off">裁剪關</string>
+    <string name="reader_night_on">夜間開</string>
+    <string name="reader_night_off">夜間關</string>
+    <string name="reader_exit">退出</string>
+    <string name="reader_close">收起</string>
+    <string name="reader_page_indicator">第 %1$d 頁，共 %2$d 頁</string>
+    <string name="reader_retry">重試</string>
+    <string name="reader_back">返回</string>
+    <string name="reader_notice_dismiss">知道了</string>
+    <string name="reader_loading_failed">頁面載入失敗</string>
+    <string name="reader_image_decode_failed">圖片解碼失敗</string>
+    <string name="reader_page_description">第 %1$d 頁</string>
+</resources>

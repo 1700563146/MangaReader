@@ -13,16 +13,13 @@
     <string name="history_empty_body">读过的章节会出现在这里，进度会自动保存在本机。</string>
     <string name="browse_empty_title">从规则开始</string>
     <string name="browse_empty_body">在「我的 → 规则管理」导入 JSON 规则，然后回来搜索。\n示例规则见仓库 docs/examples。</string>
-    <string name="me_title">我的</string>
 
     <string name="settings_appearance">外观</string>
-    <string name="settings_theme">主题</string>
     <string name="theme_system">跟随系统</string>
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="settings_about">关于</string>
     <string name="settings_version">版本</string>
-    <string name="settings_legal">许可证与免责声明</string>
     <string name="settings_legal_hint">GPL-3.0 · 不提供任何漫画内容</string>
 
     <string name="action_retry">重试</string>
@@ -40,7 +37,6 @@
     <string name="rules_import_hint">粘贴规则 JSON</string>
     <string name="rules_empty_title">还没有导入规则</string>
     <string name="rules_empty_body">规则是 JSON 数据文件，描述一个站点如何搜索、解析详情与图片。本应用不内置任何源。</string>
-    <string name="placeholder_m0">M0 骨架：功能将在后续里程碑接入</string>
     <string name="shelf_updates_only">仅更新</string>
     <string name="shelf_all">全部</string>
     <string name="shelf_no_updates_title">暂无更新</string>

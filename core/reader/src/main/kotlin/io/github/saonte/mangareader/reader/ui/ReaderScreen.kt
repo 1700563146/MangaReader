@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -35,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.saonte.mangareader.model.ReadMode
 import io.github.saonte.mangareader.model.TapConfig
 import io.github.saonte.mangareader.reader.PageSource
+import io.github.saonte.mangareader.reader.R
 import io.github.saonte.mangareader.reader.ReaderController
 import kotlinx.coroutines.launch
 
@@ -188,8 +190,8 @@ private fun ErrorOverlay(
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
-            TextButton(onClick = onRetry) { Text("重试", color = Color.White) }
-            TextButton(onClick = onDismiss) { Text("返回", color = Color.White) }
+            TextButton(onClick = onRetry) { Text(stringResource(R.string.reader_retry), color = Color.White) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.reader_back), color = Color.White) }
         }
     }
 }
