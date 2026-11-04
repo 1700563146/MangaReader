@@ -43,6 +43,13 @@ class ShelfViewModel @Inject constructor(
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
+    private val _updatesOnly = MutableStateFlow(false)
+    val updatesOnly: StateFlow<Boolean> = _updatesOnly
+
+    fun toggleUpdatesOnly() {
+        _updatesOnly.value = !_updatesOnly.value
+    }
+
     fun checkUpdates() {
         if (_checking.value) return
         viewModelScope.launch {

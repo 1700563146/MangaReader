@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,6 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.saonte.mangareader.BuildConfig
 import io.github.saonte.mangareader.R
+import io.github.saonte.mangareader.model.ReadMode
 import io.github.saonte.mangareader.model.ThemeMode
 import io.github.saonte.mangareader.ui.components.ScreenHeader
 
@@ -40,6 +42,8 @@ fun SettingsScreen(
     onOpenBackup: () -> Unit = {},
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val readerMode by viewModel.readerMode.collectAsStateWithLifecycle()
+    val readerDoublePage by viewModel.readerDoublePage.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -77,6 +81,28 @@ fun SettingsScreen(
         SectionTitle(stringResource(R.string.settings_appearance))
         ThemeOptions(selected = themeMode, onSelect = viewModel::setThemeMode)
 
+        SectionTitle("阅读")
+        ReaderModeOptions(selected = readerMode, onSelect = viewModel::setReaderMode)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("双页模式", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    "仅横向翻页生效",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(
+                checked = readerDoublePage,
+                onCheckedChange = viewModel::setReaderDoublePage,
+            )
+        }
+
         if (BuildConfig.DEBUG) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             SectionTitle("开发者")
@@ -112,6 +138,34 @@ private fun SectionTitle(text: String) {
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
     )
+}
+
+@Composable
+private fun ReaderModeOptions(selected: ReadMode, onSelect: (ReadMode) -> Unit) {
+    val options = listOf(
+        ReadMode.PAGED_LTR to "左 → 右",
+        ReadMode.PAGED_RTL to "右 → 左",
+        ReadMode.PAGED_TTB to "上下翻页",
+        ReadMode.WEBTOON to "条漫（连续滚动）",
+    )
+    Column(modifier = Modifier.selectableGroup()) {
+        options.forEach { (mode, label) ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = selected == mode,
+                        onClick = { onSelect(mode) },
+                        role = Role.RadioButton,
+                    )
+                    .padding(horizontal = 24.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(selected = selected == mode, onClick = null)
+                Text(label, modifier = Modifier.padding(start = 8.dp))
+            }
+        }
+    }
 }
 
 @Composable

@@ -10,21 +10,31 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.saonte.mangareader.data.repo.ChapterRepository
 import io.github.saonte.mangareader.data.repo.ComicRepository
 import io.github.saonte.mangareader.data.repo.SourceRepository
+import io.github.saonte.mangareader.data.settings.SettingsRepository
 import io.github.saonte.mangareader.domain.SourceManager
 import io.github.saonte.mangareader.domain.userMessage
 import io.github.saonte.mangareader.model.Chapter
 import io.github.saonte.mangareader.model.Comic
+import io.github.saonte.mangareader.model.ReadMode
 import io.github.saonte.mangareader.navigation.ReaderRoute
 import io.github.saonte.mangareader.reader.PageSource
 import io.github.saonte.mangareader.storage.DownloadScheduler
 import io.github.saonte.mangareader.source.SourceEngine
 import io.github.saonte.mangareader.source.SourceFailure
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
+
+data class ReaderPreferences(
+    val mode: ReadMode = ReadMode.PAGED_LTR,
+    val doublePage: Boolean = false,
+)
 
 data class ReaderSession(
     val comic: Comic,
@@ -49,11 +59,29 @@ class ReaderViewModel @Inject constructor(
     private val chapters: ChapterRepository,
     private val sources: SourceRepository,
     private val downloads: DownloadScheduler,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<ReaderRoute>()
     private val _state = MutableStateFlow<ReaderSessionState>(ReaderSessionState.Loading)
     val state: StateFlow<ReaderSessionState> = _state.asStateFlow()
+
+    val preferences: StateFlow<ReaderPreferences> = combine(
+        settings.readerMode,
+        settings.readerDoublePage,
+    ) { mode, doublePage -> ReaderPreferences(mode, doublePage) }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ReaderPreferences(),
+    )
+
+    fun setModePreference(mode: ReadMode) {
+        viewModelScope.launch { settings.setReaderMode(mode) }
+    }
+
+    fun setDoublePagePreference(enabled: Boolean) {
+        viewModelScope.launch { settings.setReaderDoublePage(enabled) }
+    }
 
     init {
         load()

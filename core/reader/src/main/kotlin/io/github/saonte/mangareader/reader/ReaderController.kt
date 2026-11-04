@@ -41,12 +41,16 @@ data class ReaderUiState(
  */
 class ReaderController(
     private val pageSource: PageSource,
+    initialMode: ReadMode = ReadMode.PAGED_LTR,
+    initialDoublePage: Boolean = false,
     private val progressSink: ProgressSink? = null,
 ) {
     private val _state = MutableStateFlow(
         ReaderUiState(
             chapterTitle = pageSource.chapterTitle,
             pageCount = pageSource.pageCount.value,
+            mode = initialMode,
+            doublePage = initialDoublePage,
         ),
     )
     val state: StateFlow<ReaderUiState> = _state.asStateFlow()
@@ -94,6 +98,10 @@ class ReaderController(
 
     fun toggleDoublePage() {
         _state.update { it.copy(doublePage = !it.doublePage) }
+    }
+
+    fun setDoublePage(enabled: Boolean) {
+        _state.update { it.copy(doublePage = enabled) }
     }
 
     fun onScaleChanged(scale: Float) {

@@ -193,6 +193,33 @@ class DetailViewModel @Inject constructor(
         }
     }
 
+    fun downloadAll() {
+        val comic = _state.value.comic ?: return
+        val pending = _state.value.chapters.filter { chapter ->
+            val task = _state.value.downloads[chapter.id]
+            !chapter.downloaded && task == null
+        }
+        if (pending.isEmpty()) {
+            _state.update { it.copy(message = "没有需要下载的章节") }
+            return
+        }
+        viewModelScope.launch {
+            pending.forEach { chapter ->
+                downloads.enqueue(
+                    DownloadRequest(
+                        comicId = comic.id,
+                        chapterId = chapter.id,
+                        sourceType = comic.source,
+                        cid = comic.cid,
+                        chapterPath = chapter.path,
+                        title = chapter.title,
+                    ),
+                )
+            }
+            _state.update { it.copy(message = "已加入下载队列：${pending.size} 章") }
+        }
+    }
+
     fun dismissMessage() {
         _state.update { it.copy(message = null) }
     }

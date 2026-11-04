@@ -15,11 +15,23 @@ android {
         applicationId = "io.github.saonte.mangareader"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 10
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+    }
+
+    val releaseKeystore = System.getenv("MANGA_KEYSTORE_FILE")?.takeIf { it.isNotBlank() }
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("MANGA_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("MANGA_KEY_ALIAS")
+                keyPassword = System.getenv("MANGA_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -28,10 +40,12 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug")
+            // 本地/CI 无签名密钥时回退 debug 签名，仅用于验证安装；
+            // 正式发布必须提供 MANGA_KEYSTORE_* 环境变量（见 release.yml）。
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 

@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.saonte.mangareader.reader.ProgressSink
 import io.github.saonte.mangareader.reader.ReaderController
 import io.github.saonte.mangareader.reader.ui.ReaderScreen
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun ReaderRouteScreen(
@@ -30,6 +31,7 @@ fun ReaderRouteScreen(
     viewModel: ReaderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val prefs by viewModel.preferences.collectAsStateWithLifecycle()
 
     when (val current = state) {
         ReaderSessionState.Loading -> Box(
@@ -65,12 +67,18 @@ fun ReaderRouteScreen(
                 ReaderController(
                     pageSource = session.pageSource,
                     progressSink = ProgressSink { _, _, page, _ -> viewModel.onPageSettled(page) },
+                    initialMode = prefs.mode,
+                    initialDoublePage = prefs.doublePage,
                 )
             }
+            LaunchedEffect(prefs.mode) { controller.setMode(prefs.mode) }
+            LaunchedEffect(prefs.doublePage) { controller.setDoublePage(prefs.doublePage) }
             ReaderScreen(
                 controller = controller,
                 pageSource = session.pageSource,
                 onExit = onExit,
+                onModeChanged = viewModel::setModePreference,
+                onDoublePageChanged = viewModel::setDoublePagePreference,
             )
         }
     }

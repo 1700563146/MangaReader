@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import io.github.saonte.mangareader.model.ReadMode
 import io.github.saonte.mangareader.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -28,7 +30,26 @@ class SettingsRepository @Inject constructor(
         dataStore.edit { it[KEY_THEME_MODE] = mode.name }
     }
 
+    val readerMode: Flow<ReadMode> = dataStore.data.map { prefs ->
+        prefs[KEY_READER_MODE]?.let { raw -> ReadMode.entries.firstOrNull { it.name == raw } }
+            ?: ReadMode.PAGED_LTR
+    }
+
+    suspend fun setReaderMode(mode: ReadMode) {
+        dataStore.edit { it[KEY_READER_MODE] = mode.name }
+    }
+
+    val readerDoublePage: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_READER_DOUBLE_PAGE] ?: false
+    }
+
+    suspend fun setReaderDoublePage(enabled: Boolean) {
+        dataStore.edit { it[KEY_READER_DOUBLE_PAGE] = enabled }
+    }
+
     private companion object {
         val KEY_THEME_MODE = stringPreferencesKey("theme.mode")
+        val KEY_READER_MODE = stringPreferencesKey("reader.mode")
+        val KEY_READER_DOUBLE_PAGE = booleanPreferencesKey("reader.doublePage")
     }
 }

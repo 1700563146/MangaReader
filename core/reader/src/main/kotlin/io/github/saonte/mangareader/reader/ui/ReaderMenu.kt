@@ -60,7 +60,12 @@ fun ReaderMenu(
             ) {
                 TextButton(onClick = onToggleMode) {
                     Text(
-                        text = if (state.mode == ReadMode.WEBTOON) "切换翻页" else "切换条漫",
+                        text = when (state.mode) {
+                            ReadMode.PAGED_LTR -> "左→右"
+                            ReadMode.PAGED_RTL -> "右→左"
+                            ReadMode.PAGED_TTB -> "上下"
+                            ReadMode.WEBTOON -> "条漫"
+                        },
                         color = Color.White,
                     )
                 }

@@ -45,6 +45,8 @@ fun ReaderScreen(
     controller: ReaderController,
     pageSource: PageSource,
     onExit: () -> Unit,
+    onModeChanged: (ReadMode) -> Unit = {},
+    onDoublePageChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state by controller.state.collectAsStateWithLifecycle()
@@ -102,11 +104,19 @@ fun ReaderScreen(
             ReaderMenu(
                 state = state,
                 onToggleMode = {
-                    controller.setMode(
-                        if (state.mode == ReadMode.WEBTOON) ReadMode.PAGED_LTR else ReadMode.WEBTOON,
-                    )
+                    val next = when (state.mode) {
+                        ReadMode.PAGED_LTR -> ReadMode.PAGED_RTL
+                        ReadMode.PAGED_RTL -> ReadMode.PAGED_TTB
+                        ReadMode.PAGED_TTB -> ReadMode.WEBTOON
+                        ReadMode.WEBTOON -> ReadMode.PAGED_LTR
+                    }
+                    controller.setMode(next)
+                    onModeChanged(next)
                 },
-                onToggleDoublePage = controller::toggleDoublePage,
+                onToggleDoublePage = {
+                    controller.toggleDoublePage()
+                    onDoublePageChanged(!state.doublePage)
+                },
                 onExit = onExit,
                 onClose = controller::toggleMenu,
             )

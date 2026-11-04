@@ -63,6 +63,18 @@ fun DetailScreen(
             return@Column
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            TextButton(
+                enabled = state.chapters.isNotEmpty(),
+                onClick = viewModel::downloadAll,
+            ) { Text("下载全部") }
+        }
+
         state.message?.let { message ->
             Text(
                 text = message,

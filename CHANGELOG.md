@@ -18,6 +18,19 @@
 
 - 明确零内置源、规则沙箱、签名与撤销机制、实名投诉通道。
 
+## [0.9.0-M7] - 2026-11-04
+
+### Added
+
+- 版本 1.0.0（versionCode 10）；Release 启用 R8 + 资源压缩，Rhino/serialization keep 规则。
+- GitHub Release 工作流（tag `v*`）：可选 keystore 签名、APK 产物与 Release note；PR 门禁增加 release 构建。
+- 阅读设置：默认翻页模式（左→右/右→左/上下/条漫）与双页开关持久化，阅读器即时生效。
+- 阅读菜单模式循环；详情页「下载全部」；书架「仅更新」筛选。
+
+### Fixed
+
+- R8 缺失 jsoup 可选 Re2J 类导致 release 构建失败。
+
 ## [0.8.0-M6] - 2026-11-04
 
 ### Added

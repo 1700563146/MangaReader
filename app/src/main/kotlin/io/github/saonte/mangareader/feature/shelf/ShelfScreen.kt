@@ -40,6 +40,7 @@ fun ShelfScreen(
     val shelf by viewModel.shelf.collectAsStateWithLifecycle()
     val checking by viewModel.checking.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
+    val updatesOnly by viewModel.updatesOnly.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -55,6 +56,9 @@ fun ShelfScreen(
                 onClick = viewModel::checkUpdates,
             ) {
                 Text(if (checking) "检查中…" else "检查更新")
+            }
+            TextButton(onClick = viewModel::toggleUpdatesOnly) {
+                Text(if (updatesOnly) "全部" else "仅更新")
             }
         }
         message?.let {
@@ -73,12 +77,18 @@ fun ShelfScreen(
                 TextButton(onClick = viewModel::dismissMessage) { Text("知道了") }
             }
         }
+        val visibleShelf = if (updatesOnly) shelf.filter { it.highlight } else shelf
         if (shelf.isEmpty()) {
             EmptyState(
                 title = stringResource(R.string.shelf_empty_title),
                 body = stringResource(R.string.shelf_empty_body),
                 actionLabel = stringResource(R.string.nav_browse),
                 onAction = onBrowse,
+            )
+        } else if (visibleShelf.isEmpty()) {
+            EmptyState(
+                title = "暂无更新",
+                body = "点击「检查更新」后，有新章节的漫画会出现在这里。",
             )
         } else {
             LazyVerticalGrid(
@@ -88,7 +98,7 @@ fun ShelfScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                items(shelf, key = { it.id }) { comic ->
+                items(visibleShelf, key = { it.id }) { comic ->
                     ShelfItem(comic, onClick = { onOpenDetail(comic.source, comic.cid) })
                 }
             }

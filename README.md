@@ -7,7 +7,7 @@
 [![Platform](https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84.svg)](https://developer.android.com)
 [![Status](https://img.shields.io/badge/status-docs%20phase-orange.svg)](docs/08-roadmap.md)
 
-> **当前状态：M6 本地备份/恢复完成，M7 硬化与 v1.0 发布进行中。** 详见 [`docs/08-roadmap.md`](docs/08-roadmap.md)。
+> **当前状态：M7 发布链路与阅读设置完成；v1.0 验收（P0/性能/无障碍）进行中。** 详见 [`docs/08-roadmap.md`](docs/08-roadmap.md)。
 
 ![书架空状态（M0）](docs/screenshots/m0-shelf.png)
 
