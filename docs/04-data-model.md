@@ -185,9 +185,10 @@ CREATE TABLE comic (
     last_chapter_index  INTEGER,
     last_page           INTEGER NOT NULL DEFAULT 0,     -- 0-based
     chapter_count       INTEGER NOT NULL DEFAULT 0,
-    url                 TEXT,
-    FOREIGN KEY (source) REFERENCES source(type) ON DELETE CASCADE
+    url                 TEXT
 );
+-- 注意：source 为 0 表示本地漫画，没有对应的 source 行，因此不建外键；
+-- 孤立数据的清理由 Repository 在删除源时显式完成。
 CREATE UNIQUE INDEX idx_comic_source_cid ON comic(source, cid);
 CREATE INDEX idx_comic_favorite ON comic(favorite_at) WHERE favorite_at IS NOT NULL;
 CREATE INDEX idx_comic_history  ON comic(history_at)  WHERE history_at IS NOT NULL;

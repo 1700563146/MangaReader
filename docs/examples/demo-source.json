@@ -80,7 +80,7 @@
   },
   "chapters": {
     "request": { "url": "https://example.com/comic/${cid}/" },
-    "list": { "select": "ul.chapter-list > li", "limit": 5000 },
+    "list": { "select": "ul.chapter-list > li", "limit": 500 },
     "fields": {
       "title": "a",
       "path": { "select": "a", "attr": "href", "pipeline": ["absUrl"] },
