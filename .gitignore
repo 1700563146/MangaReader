@@ -31,6 +31,21 @@ secrets.properties
 .env.*
 *.p12
 *.pem
+*.p8
+*.key
+*.bks
+*.pkcs12
+*.pfx
+
+# 签名材料导出/备份（含 keystore base64、指纹、密码说明）
+# 注意：这些文件里可能包含完整 PKCS12 base64，一旦入库等同泄露私钥
+*keystore*.txt
+*私钥*.txt
+*密钥*.txt
+*密码*.txt
+*签名*.txt
+signing/
+release-keys/
 !docs/schema/*.json
 
 # Lint / reports（构建产物；docs/reports 是项目文档，需保留）
