@@ -292,7 +292,10 @@ LaunchedEffect(pagerState) {
 - Compose 专项：开启 strong skipping、`@Immutable` 状态、稳定的 `key`、避免在 item 内 `remember` 大对象。
 - `ReaderMetrics`（debug）：页加载耗时、命中率、失败率；release 只写本地环形日志。
 
-### 12.1 M2 决策门
+### 12.1 M2 实现状态与决策门
+
+**M2 已实现**：Compose Pager/LazyColumn 双模式、双页、自定义 `zoomable` 手势仲裁、预取、Coil Header 注入、沉浸模式。
+**顺延**：真机 Macrobenchmark 与 SavedState 恢复在 M7；届时若「翻页首帧 >150ms」或「条漫掉帧 >10%」，执行下方回退方案。
 
 若连续两轮基准测试中「翻页首帧 > 150ms」或「条漫掉帧 > 10%」，执行回退方案：
 

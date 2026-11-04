@@ -7,7 +7,7 @@
 [![Platform](https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84.svg)](https://developer.android.com)
 [![Status](https://img.shields.io/badge/status-docs%20phase-orange.svg)](docs/08-roadmap.md)
 
-> **当前状态：M0 完成（工程骨架可构建运行），M1 数据与规则引擎进行中。** 详见 [`docs/08-roadmap.md`](docs/08-roadmap.md)。
+> **当前状态：M2 阅读器功能完成（M0/M1/M2 已交付），M3 主流程闭环进行中。** 详见 [`docs/08-roadmap.md`](docs/08-roadmap.md)。
 
 ![书架空状态（M0）](docs/screenshots/m0-shelf.png)
 

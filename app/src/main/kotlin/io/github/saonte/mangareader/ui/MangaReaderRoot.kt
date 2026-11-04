@@ -3,8 +3,8 @@ package io.github.saonte.mangareader.ui
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -32,11 +32,13 @@ import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.designsystem.theme.MangaReaderTheme
 import io.github.saonte.mangareader.feature.browse.BrowseScreen
 import io.github.saonte.mangareader.feature.history.HistoryScreen
+import io.github.saonte.mangareader.feature.reader.ReaderDemoScreen
 import io.github.saonte.mangareader.feature.settings.SettingsScreen
 import io.github.saonte.mangareader.feature.shelf.ShelfScreen
 import io.github.saonte.mangareader.model.ThemeMode
 import io.github.saonte.mangareader.navigation.BrowseRoute
 import io.github.saonte.mangareader.navigation.HistoryRoute
+import io.github.saonte.mangareader.navigation.ReaderDemoRoute
 import io.github.saonte.mangareader.navigation.SettingsRoute
 import io.github.saonte.mangareader.navigation.ShelfRoute
 import kotlin.reflect.KClass
@@ -52,8 +54,11 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
 
     MangaReaderTheme(darkTheme = darkTheme) {
         val navController = rememberNavController()
+        val backStackEntry by navController.currentBackStackEntryAsState()
+        val showBottomBar = backStackEntry?.destination.isTopLevel()
+
         Scaffold(
-            bottomBar = { MangaBottomBar(navController) },
+            bottomBar = { if (showBottomBar) MangaBottomBar(navController) },
         ) { innerPadding ->
             NavHost(
                 navController = navController,
@@ -63,7 +68,12 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                 composable<ShelfRoute> { ShelfScreen() }
                 composable<HistoryRoute> { HistoryScreen() }
                 composable<BrowseRoute> { BrowseScreen() }
-                composable<SettingsRoute> { SettingsScreen() }
+                composable<SettingsRoute> {
+                    SettingsScreen(onOpenReaderDemo = { navController.navigate(ReaderDemoRoute) })
+                }
+                composable<ReaderDemoRoute> {
+                    ReaderDemoScreen(onExit = { navController.popBackStack() })
+                }
             }
         }
     }
@@ -119,6 +129,16 @@ private fun androidx.compose.foundation.layout.RowScope.BottomItem(
 
 private fun NavDestination?.isOn(route: KClass<*>): Boolean =
     this?.hierarchy?.any { it.hasRoute(route) } == true
+
+private fun NavDestination?.isTopLevel(): Boolean =
+    this?.let { destination -> TOP_LEVEL_ROUTES.any { destination.hasRoute(it) } } ?: true
+
+private val TOP_LEVEL_ROUTES: List<KClass<*>> = listOf(
+    ShelfRoute::class,
+    HistoryRoute::class,
+    BrowseRoute::class,
+    SettingsRoute::class,
+)
 
 private fun NavHostController.navigateTopLevel(route: Any) {
     navigate(route) {

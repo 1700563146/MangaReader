@@ -14,6 +14,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import io.github.saonte.mangareader.ui.components.ScreenHeader
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
+    onOpenReaderDemo: () -> Unit = {},
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
 
@@ -44,6 +46,17 @@ fun SettingsScreen(
 
         SectionTitle(stringResource(R.string.settings_appearance))
         ThemeOptions(selected = themeMode, onSelect = viewModel::setThemeMode)
+
+        if (BuildConfig.DEBUG) {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            SectionTitle("开发者")
+            TextButton(
+                onClick = onOpenReaderDemo,
+                modifier = Modifier.padding(horizontal = 12.dp),
+            ) {
+                Text("阅读器演示（本地占位图）")
+            }
+        }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 

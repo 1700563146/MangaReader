@@ -18,6 +18,16 @@
 
 - 明确零内置源、规则沙箱、签名与撤销机制、实名投诉通道。
 
+## [0.3.0-M2] - 2026-11-04
+
+### Added
+
+- Compose 阅读器：翻页（LTR/RTL/TTB）、条漫、双页、点击区、长按切模式、沉浸模式。
+- 自定义 `ZoomState` + `zoomable` 手势仲裁（双指缩放、放大后平移、不干扰 Pager/滚动）。
+- `ReaderPrefetcher` 窗口预取；Coil 3 `httpHeaders` 注入 Referer/Cookie；单页失败重试。
+- `ProgressSink` 进度出口；Debug「阅读器演示」入口（本地占位图，无漫画内容）。
+- 单元测试：`ReaderControllerTest` 8 项、`ZoomStateTest` 4 项；模拟器截图与冒烟数据。
+
 ## [0.2.0-M1] - 2026-11-04
 
 ### Added
