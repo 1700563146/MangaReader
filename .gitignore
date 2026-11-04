@@ -33,11 +33,12 @@ secrets.properties
 *.pem
 !docs/schema/*.json
 
-# Lint / reports
+# Lint / reports（构建产物；docs/reports 是项目文档，需保留）
 lint-results*.html
 lint-results*.xml
-reports/
-**/reports/
+/build/reports/
+*/build/reports/
+**/build/reports/
 detekt-baseline.xml
 spotless-index
 
