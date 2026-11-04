@@ -2,6 +2,7 @@ package io.github.saonte.mangareader.reader
 
 import io.github.saonte.mangareader.model.ImageRef
 import io.github.saonte.mangareader.model.ReadMode
+import io.github.saonte.mangareader.model.TapConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,10 @@ data class ReaderUiState(
     val isMenuVisible: Boolean = false,
     val loading: Boolean = true,
     val error: String? = null,
+    val tapConfig: TapConfig = TapConfig.DEFAULT,
+    val brightness: Float = 1f,
+    val nightFilter: Boolean = false,
+    val autoCrop: Boolean = false,
 )
 
 /**
@@ -104,6 +109,22 @@ class ReaderController(
         _state.update { it.copy(doublePage = enabled) }
     }
 
+    fun setTapConfig(config: TapConfig) {
+        _state.update { it.copy(tapConfig = config) }
+    }
+
+    fun setBrightness(value: Float) {
+        _state.update { it.copy(brightness = value.coerceIn(MIN_BRIGHTNESS, 1f)) }
+    }
+
+    fun toggleNightFilter() {
+        _state.update { it.copy(nightFilter = !it.nightFilter) }
+    }
+
+    fun toggleAutoCrop() {
+        _state.update { it.copy(autoCrop = !it.autoCrop) }
+    }
+
     fun onScaleChanged(scale: Float) {
         _state.update { it.copy(scale = scale.coerceIn(1f, MAX_SCALE)) }
     }
@@ -118,6 +139,7 @@ class ReaderController(
 
     companion object {
         const val MAX_SCALE = 5f
+        const val MIN_BRIGHTNESS = 0.15f
 
         /** 双页模式下 pager 的逻辑页数（最后一页可能单独占一屏）。 */
         fun spreadCount(pages: Int, doublePage: Boolean): Int = when {

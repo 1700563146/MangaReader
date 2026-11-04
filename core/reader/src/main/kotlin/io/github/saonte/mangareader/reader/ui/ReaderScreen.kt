@@ -33,6 +33,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.saonte.mangareader.model.ReadMode
+import io.github.saonte.mangareader.model.TapConfig
 import io.github.saonte.mangareader.reader.PageSource
 import io.github.saonte.mangareader.reader.ReaderController
 import kotlinx.coroutines.launch
@@ -45,8 +46,12 @@ fun ReaderScreen(
     controller: ReaderController,
     pageSource: PageSource,
     onExit: () -> Unit,
+    onBrightnessChanged: (Float) -> Unit = {},
+    onNightFilterChanged: (Boolean) -> Unit = {},
+    onAutoCropChanged: (Boolean) -> Unit = {},
     onModeChanged: (ReadMode) -> Unit = {},
     onDoublePageChanged: (Boolean) -> Unit = {},
+    tapConfig: TapConfig = TapConfig.DEFAULT,
     modifier: Modifier = Modifier,
 ) {
     val state by controller.state.collectAsStateWithLifecycle()
@@ -69,6 +74,7 @@ fun ReaderScreen(
     }
 
     LaunchedEffect(controller) { controller.load() }
+    LaunchedEffect(tapConfig) { controller.setTapConfig(tapConfig) }
 
     Box(
         modifier = modifier
@@ -78,6 +84,23 @@ fun ReaderScreen(
         when (state.mode) {
             ReadMode.WEBTOON -> WebtoonReader(controller, pageSource)
             else -> PagedReader(controller, pageSource)
+        }
+
+        // 亮度：黑色遮罩（不修改系统亮度，退出即恢复）
+        if (state.brightness < 1f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = (1f - state.brightness).coerceIn(0f, 0.85f))),
+            )
+        }
+        // 夜间滤镜：降低蓝光，暖色叠加
+        if (state.nightFilter) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x33FF8A00)),
+            )
         }
 
         if (state.loading) {
@@ -116,6 +139,18 @@ fun ReaderScreen(
                 onToggleDoublePage = {
                     controller.toggleDoublePage()
                     onDoublePageChanged(!state.doublePage)
+                },
+                onBrightness = {
+                    controller.setBrightness(it)
+                    onBrightnessChanged(it)
+                },
+                onToggleNightFilter = {
+                    controller.toggleNightFilter()
+                    onNightFilterChanged(!state.nightFilter)
+                },
+                onToggleAutoCrop = {
+                    controller.toggleAutoCrop()
+                    onAutoCropChanged(!state.autoCrop)
                 },
                 onExit = onExit,
                 onClose = controller::toggleMenu,

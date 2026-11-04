@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.saonte.mangareader.data.repo.ChapterRepository
 import io.github.saonte.mangareader.data.repo.ComicRepository
 import io.github.saonte.mangareader.data.repo.SourceRepository
+import io.github.saonte.mangareader.data.settings.SettingsRepository
 import io.github.saonte.mangareader.domain.SourceManager
 import io.github.saonte.mangareader.domain.userMessage
 import io.github.saonte.mangareader.model.Chapter
@@ -35,6 +36,7 @@ data class DetailUiState(
     val favorite: Boolean = false,
     val message: String? = null,
     val downloads: Map<Long, DownloadTask> = emptyMap(),
+    val chaptersDescending: Boolean = false,
 )
 
 @HiltViewModel
@@ -46,6 +48,7 @@ class DetailViewModel @Inject constructor(
     private val chapters: ChapterRepository,
     private val sources: SourceRepository,
     private val downloads: DownloadScheduler,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
 
     private val route = savedStateHandle.toRoute<DetailRoute>()
@@ -58,6 +61,20 @@ class DetailViewModel @Inject constructor(
 
     init {
         load()
+        viewModelScope.launch {
+            settings.chaptersDescending.collect { descending ->
+                _state.update { current ->
+                    if (current.chaptersDescending == descending) {
+                        current
+                    } else {
+                        current.copy(
+                            chaptersDescending = descending,
+                            chapters = current.chapters.reversed(),
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun load() {
@@ -71,7 +88,7 @@ class DetailViewModel @Inject constructor(
                     it.copy(
                         loading = false,
                         comic = cached,
-                        chapters = cachedChapters,
+                        chapters = if (it.chaptersDescending) cachedChapters.reversed() else cachedChapters,
                         favorite = cached.favoriteAt != null,
                     )
                 }
@@ -193,6 +210,14 @@ class DetailViewModel @Inject constructor(
         }
     }
 
+    fun toggleChapterOrder() {
+        val next = !_state.value.chaptersDescending
+        viewModelScope.launch { settings.setChaptersDescending(next) }
+        _state.update {
+            it.copy(chaptersDescending = next, chapters = it.chapters.reversed())
+        }
+    }
+
     fun downloadAll() {
         val comic = _state.value.comic ?: return
         val pending = _state.value.chapters.filter { chapter ->
@@ -237,7 +262,9 @@ class DetailViewModel @Inject constructor(
         chaptersJob?.cancel()
         chaptersJob = viewModelScope.launch {
             chapters.observe(id).collect { list ->
-                _state.update { it.copy(chapters = list) }
+                _state.update {
+                    it.copy(chapters = if (it.chaptersDescending) list.reversed() else list)
+                }
             }
         }
     }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.saonte.mangareader.model.ReadMode
+import io.github.saonte.mangareader.model.TapAction
 import io.github.saonte.mangareader.reader.PageSource
 import io.github.saonte.mangareader.reader.ReaderController
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -36,6 +37,8 @@ fun PagedReader(
 ) {
     val state by controller.state.collectAsStateWithLifecycle()
     val doublePage = state.doublePage && state.mode != ReadMode.PAGED_TTB
+    // 自动裁剪：优先铺满屏幕，牺牲留白换可读性（用户可在菜单切换）
+    val scale = if (state.autoCrop) ContentScale.Crop else ContentScale.Fit
     val totalPages = state.pageCount.coerceAtLeast(1)
     val pageCount = ReaderController.spreadCount(totalPages, doublePage).coerceAtLeast(1)
     val initialSpread = if (doublePage) state.pageIndex / 2 else state.pageIndex
@@ -66,15 +69,16 @@ fun PagedReader(
         }
     }
     val onTapZone: (TapZone) -> Unit = { zone ->
-        val delta = when (zone) {
-            TapZone.LEFT -> if (reverse) 1 else -1
-            TapZone.RIGHT -> if (reverse) -1 else 1
-            TapZone.CENTER -> {
-                controller.toggleMenu()
-                0
-            }
+        val action = when (zone) {
+            TapZone.LEFT -> state.tapConfig.left
+            TapZone.CENTER -> state.tapConfig.center
+            TapZone.RIGHT -> state.tapConfig.right
         }
-        if (delta != 0) turn(delta)
+        when (action) {
+            TapAction.PREV -> turn(if (reverse) 1 else -1)
+            TapAction.NEXT -> turn(if (reverse) -1 else 1)
+            TapAction.MENU -> controller.toggleMenu()
+        }
     }
 
     val toggleMode = { controller.setMode(ReadMode.WEBTOON) }
@@ -87,7 +91,7 @@ fun PagedReader(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
-                    contentScale = ContentScale.Fit,
+                    contentScale = scale,
                     onTapZone = onTapZone,
                     onLongPress = toggleMode,
                     onZoomChanged = { zoomed = it },
@@ -99,7 +103,7 @@ fun PagedReader(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
-                        contentScale = ContentScale.Fit,
+                        contentScale = scale,
                         onTapZone = onTapZone,
                         onLongPress = toggleMode,
                         onZoomChanged = { zoomed = it },
@@ -111,7 +115,7 @@ fun PagedReader(
                 pageSource = pageSource,
                 index = spread,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
+                contentScale = scale,
                 onTapZone = onTapZone,
                 onLongPress = toggleMode,
                 onZoomChanged = { zoomed = it },

@@ -79,6 +79,7 @@ fun ReaderRouteScreen(
                 onExit = onExit,
                 onModeChanged = viewModel::setModePreference,
                 onDoublePageChanged = viewModel::setDoublePagePreference,
+                tapConfig = prefs.tapConfig,
             )
         }
     }

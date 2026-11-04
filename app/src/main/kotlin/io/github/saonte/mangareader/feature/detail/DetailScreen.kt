@@ -69,6 +69,9 @@ fun DetailScreen(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.End,
         ) {
+            TextButton(onClick = viewModel::toggleChapterOrder) {
+                Text(if (state.chaptersDescending) "正序" else "倒序")
+            }
             TextButton(
                 enabled = state.chapters.isNotEmpty(),
                 onClick = viewModel::downloadAll,

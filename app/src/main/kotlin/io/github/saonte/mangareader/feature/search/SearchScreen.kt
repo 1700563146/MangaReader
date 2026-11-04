@@ -130,6 +130,24 @@ fun SearchScreen(
                             SearchResultRow(item, onClick = { onOpenDetail(result.source.type, item.cid) })
                             HorizontalDivider()
                         }
+                        if (result.hasNext || result.loadingMore) {
+                            item(key = "more-${result.source.type}") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (result.loadingMore) {
+                                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                    } else {
+                                        TextButton(onClick = { viewModel.loadMore(result.source) }) {
+                                            Text("加载更多")
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         if (result.items.isEmpty()) {
                             item(key = "empty-${result.source.type}") {
                                 Text(
@@ -152,7 +170,7 @@ private fun SourceHeader(result: SourceResult) {
     val subtitle = when {
         result.failure != null -> "失败"
         result.loading -> "搜索中…"
-        else -> "${result.items.size} 条"
+        else -> "${result.items.size} 条" + if (result.hasNext) " · 还有更多" else ""
     }
     Row(
         modifier = Modifier

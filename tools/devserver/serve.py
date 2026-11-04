@@ -20,7 +20,8 @@ import urllib.parse
 from PIL import Image, ImageDraw
 
 
-def search_html() -> str:
+def search_html(page: int = 1) -> str:
+    start = 1 if page == 1 else 4
     items = "".join(
         f"""
         <li>
@@ -31,11 +32,14 @@ def search_html() -> str:
           <span class="status">连载</span>
           <span class="update">更新至第3话</span>
         </li>"""
-        for cid in (1, 2, 3)
+        for cid in (start, start + 1, start + 2)
+    )
+    next_link = (
+        '<a class="next" href="/search?q=test&page=2">下一页</a>' if page == 1 else ""
     )
     return f"""<html><body>
       <ul class="result">{items}</ul>
-      <a class="next" href="/search?q=test&page=2">下一页</a>
+      {next_link}
     </body></html>"""
 
 
@@ -106,8 +110,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
 
         if path == "/search":
-            page = query.get("page", ["1"])[0]
-            self.send_html(search_html() if page == "1" else "<html><body><ul class='result'></ul></body></html>")
+            page = int(query.get("page", ["1"])[0] or "1")
+            self.send_html(search_html(page))
             return
 
         if path.startswith("/comic/"):

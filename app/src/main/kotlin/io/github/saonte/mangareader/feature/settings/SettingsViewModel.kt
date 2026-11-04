@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.saonte.mangareader.data.settings.SettingsRepository
 import io.github.saonte.mangareader.model.ReadMode
+import io.github.saonte.mangareader.model.TapAction
+import io.github.saonte.mangareader.model.TapConfig
 import io.github.saonte.mangareader.model.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +45,17 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settings.setReaderMode(mode) }
     }
 
+    val tapConfig: StateFlow<TapConfig> = settings.tapConfig.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = TapConfig.DEFAULT,
+    )
+
     fun setReaderDoublePage(enabled: Boolean) {
         viewModelScope.launch { settings.setReaderDoublePage(enabled) }
+    }
+
+    fun setTapAction(zone: String, action: TapAction) {
+        viewModelScope.launch { settings.setTapAction(zone, action) }
     }
 }

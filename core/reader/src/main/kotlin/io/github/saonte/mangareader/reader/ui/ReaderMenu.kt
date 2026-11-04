@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,6 +26,9 @@ fun ReaderMenu(
     state: ReaderUiState,
     onToggleMode: () -> Unit,
     onToggleDoublePage: () -> Unit,
+    onBrightness: (Float) -> Unit,
+    onToggleNightFilter: () -> Unit,
+    onToggleAutoCrop: () -> Unit,
     onExit: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
@@ -52,7 +57,28 @@ fun ReaderMenu(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            Spacer(modifier = Modifier.padding(top = 4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("亮度", style = MaterialTheme.typography.labelMedium)
+                Slider(
+                    value = state.brightness,
+                    onValueChange = onBrightness,
+                    valueRange = 0.15f..1f,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color.White,
+                        activeTrackColor = Color.White,
+                        inactiveTrackColor = Color.White.copy(alpha = 0.3f),
+                    ),
+                )
+            }
+            Spacer(modifier = Modifier.padding(top = 2.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -78,6 +104,18 @@ fun ReaderMenu(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                TextButton(onClick = onToggleAutoCrop) {
+                    Text(
+                        text = if (state.autoCrop) "裁剪开" else "裁剪关",
+                        color = Color.White,
+                    )
+                }
+                TextButton(onClick = onToggleNightFilter) {
+                    Text(
+                        text = if (state.nightFilter) "夜间开" else "夜间关",
+                        color = Color.White,
+                    )
+                }
                 TextButton(onClick = onExit) { Text("退出", color = Color.White) }
                 Spacer(modifier = Modifier.width(4.dp))
                 TextButton(onClick = onClose) { Text("收起", color = Color.White) }

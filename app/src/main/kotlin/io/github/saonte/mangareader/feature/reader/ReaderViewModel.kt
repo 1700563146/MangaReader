@@ -16,6 +16,7 @@ import io.github.saonte.mangareader.domain.userMessage
 import io.github.saonte.mangareader.model.Chapter
 import io.github.saonte.mangareader.model.Comic
 import io.github.saonte.mangareader.model.ReadMode
+import io.github.saonte.mangareader.model.TapConfig
 import io.github.saonte.mangareader.navigation.ReaderRoute
 import io.github.saonte.mangareader.reader.PageSource
 import io.github.saonte.mangareader.storage.DownloadScheduler
@@ -34,6 +35,7 @@ import javax.inject.Inject
 data class ReaderPreferences(
     val mode: ReadMode = ReadMode.PAGED_LTR,
     val doublePage: Boolean = false,
+    val tapConfig: TapConfig = TapConfig.DEFAULT,
 )
 
 data class ReaderSession(
@@ -69,7 +71,8 @@ class ReaderViewModel @Inject constructor(
     val preferences: StateFlow<ReaderPreferences> = combine(
         settings.readerMode,
         settings.readerDoublePage,
-    ) { mode, doublePage -> ReaderPreferences(mode, doublePage) }.stateIn(
+        settings.tapConfig,
+    ) { mode, doublePage, taps -> ReaderPreferences(mode, doublePage, taps) }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = ReaderPreferences(),

@@ -1,5 +1,6 @@
 package io.github.saonte.mangareader.feature.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.saonte.mangareader.BuildConfig
 import io.github.saonte.mangareader.R
 import io.github.saonte.mangareader.model.ReadMode
+import io.github.saonte.mangareader.model.TapAction
+import io.github.saonte.mangareader.model.TapConfig
 import io.github.saonte.mangareader.model.ThemeMode
 import io.github.saonte.mangareader.ui.components.ScreenHeader
 
@@ -44,6 +47,7 @@ fun SettingsScreen(
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val readerMode by viewModel.readerMode.collectAsStateWithLifecycle()
     val readerDoublePage by viewModel.readerDoublePage.collectAsStateWithLifecycle()
+    val tapConfig by viewModel.tapConfig.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -103,6 +107,11 @@ fun SettingsScreen(
             )
         }
 
+        SectionTitle("点击区动作")
+        TapZoneRow("左侧", tapConfig.left) { viewModel.setTapAction("LEFT", it) }
+        TapZoneRow("中间", tapConfig.center) { viewModel.setTapAction("CENTER", it) }
+        TapZoneRow("右侧", tapConfig.right) { viewModel.setTapAction("RIGHT", it) }
+
         if (BuildConfig.DEBUG) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             SectionTitle("开发者")
@@ -138,6 +147,37 @@ private fun SectionTitle(text: String) {
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
     )
+}
+
+@Composable
+private fun TapZoneRow(label: String, selected: TapAction, onSelect: (TapAction) -> Unit) {
+    val options = listOf(
+        TapAction.PREV to "上一页",
+        TapAction.NEXT to "下一页",
+        TapAction.MENU to "菜单",
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, modifier = Modifier.weight(0.4f), style = MaterialTheme.typography.bodyLarge)
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+            options.forEach { (action, text) ->
+                TextButton(
+                    onClick = { onSelect(action) },
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        contentColor = if (selected == action) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    ),
+                ) { Text(text, style = MaterialTheme.typography.labelMedium) }
+            }
+        }
+    }
 }
 
 @Composable

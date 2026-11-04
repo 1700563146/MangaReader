@@ -175,3 +175,26 @@ enum class ErrorCode {
     CANCELLED,
     UNKNOWN,
 }
+
+/** 点击区动作（F-405）：左/中/右三区可独立配置。 */
+enum class TapAction {
+    PREV,
+    NEXT,
+    MENU,
+}
+
+data class TapConfig(
+    val left: TapAction = TapAction.PREV,
+    val center: TapAction = TapAction.MENU,
+    val right: TapAction = TapAction.NEXT,
+) {
+    fun actionFor(zone: String): TapAction = when (zone) {
+        "LEFT" -> left
+        "RIGHT" -> right
+        else -> center
+    }
+
+    companion object {
+        val DEFAULT = TapConfig()
+    }
+}

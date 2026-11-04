@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.saonte.mangareader.data.repo.Source
 import io.github.saonte.mangareader.domain.SearchCoordinator
 import io.github.saonte.mangareader.domain.SearchOutcome
+import io.github.saonte.mangareader.domain.userMessage
 import io.github.saonte.mangareader.source.ComicSummary
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,9 @@ data class SourceResult(
     val items: List<ComicSummary> = emptyList(),
     val failure: String? = null,
     val loading: Boolean = true,
+    val page: Int = 1,
+    val hasNext: Boolean = false,
+    val loadingMore: Boolean = false,
 )
 
 data class SearchUiState(
@@ -52,7 +56,13 @@ class SearchViewModel @Inject constructor(
             coordinator.search(query).collect { outcome ->
                 when (outcome) {
                     is SearchOutcome.Success -> updateResult(outcome.source) {
-                        it.copy(items = outcome.page.items, failure = null, loading = false)
+                        it.copy(
+                            items = outcome.page.items,
+                            failure = null,
+                            loading = false,
+                            page = 1,
+                            hasNext = outcome.page.hasNext,
+                        )
                     }
 
                     is SearchOutcome.Failure -> updateResult(outcome.source) {
@@ -71,6 +81,36 @@ class SearchViewModel @Inject constructor(
 
     fun retry(source: Source) {
         search(_state.value.keyword)
+    }
+
+    fun loadMore(source: Source) {
+        val current = _state.value.results.firstOrNull { it.source.type == source.type } ?: return
+        if (current.loadingMore || !current.hasNext || current.loading) return
+        val nextPage = current.page + 1
+        updateResult(source) { it.copy(loadingMore = true) }
+        viewModelScope.launch {
+            coordinator.searchPage(source, _state.value.keyword, nextPage)
+                .onSuccess { page ->
+                    updateResult(source) { result ->
+                        val existing = result.items.map { it.cid }.toSet()
+                        val merged = result.items + page.items.filter { it.cid !in existing }
+                        result.copy(
+                            items = merged,
+                            page = nextPage,
+                            hasNext = page.hasNext,
+                            loadingMore = false,
+                            failure = null,
+                        )
+                    }
+                }
+                .onFailure { throwable ->
+                    updateResult(source) { it.copy(loadingMore = false) }
+                    _state.update {
+                        it.copy(message = (throwable as? io.github.saonte.mangareader.source.SourceFailure)?.userMessage()
+                            ?: throwable.message ?: "加载更多失败")
+                    }
+                }
+        }
     }
 
     fun dismissMessage() {

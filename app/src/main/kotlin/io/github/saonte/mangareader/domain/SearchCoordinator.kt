@@ -78,6 +78,26 @@ class SearchCoordinator @Inject constructor(
         awaitClose()
     }.flowOn(Dispatchers.Default)
 
+    /** 单源分页加载（F-203）；健康度与超时策略与首屏一致。 */
+    suspend fun searchPage(source: Source, keyword: String, page: Int): Result<SearchPage> {
+        val ref = sourceManager.ref(source.type)
+            ?: return Result.failure(SourceFailure(
+                io.github.saonte.mangareader.model.ErrorCode.RULE_INVALID,
+                "规则无法解析，请重新导入",
+                step = "search",
+            ))
+        return runCatching {
+            withTimeout(SEARCH_TIMEOUT_MS) { engine.search(ref, keyword, page) }
+        }.onSuccess {
+            sources.recordSuccess(source.type)
+        }.onFailure { throwable ->
+            sources.recordFailure(
+                source.type,
+                (throwable as? SourceFailure)?.code?.name ?: "UNKNOWN",
+            )
+        }
+    }
+
     private suspend fun kotlinx.coroutines.channels.ProducerScope<SearchOutcome>.finishIfDone(
         remaining: Int,
         lock: Any,
