@@ -1,20 +1,17 @@
 package io.github.saonte.mangareader.source
 
-import io.github.saonte.mangareader.model.Chapter
-import io.github.saonte.mangareader.model.Comic
-import io.github.saonte.mangareader.model.ImageRef
-import io.github.saonte.mangareader.model.SourceRule
+import io.github.saonte.mangareader.model.ErrorCode
+import io.github.saonte.mangareader.source.rule.RuleSpec
 
 /**
- * 源引擎的统一入口。v1 由 JSON 规则驱动（[io.github.saonte.mangareader.source.rule]），
- * UI 只依赖本接口，便于后续替换实现或增加内置源（不计划）。
+ * 源引擎的统一入口。v1 由 JSON 规则驱动，UI 只依赖本接口。
  */
 interface SourceEngine {
     suspend fun search(ref: SourceRef, keyword: String, page: Int): SearchPage
 
-    suspend fun detail(ref: SourceRef, cid: String): Comic
+    suspend fun detail(ref: SourceRef, cid: String): ComicDetail
 
-    suspend fun chapters(ref: SourceRef, cid: String): List<Chapter>
+    suspend fun chapters(ref: SourceRef, cid: String): List<ChapterInfo>
 
     suspend fun images(ref: SourceRef, cid: String, chapterPath: String): ImagePage
 
@@ -27,25 +24,47 @@ interface SourceEngine {
 
 data class SourceRef(
     val type: Long,
-    val ruleId: String,
-    val rule: SourceRule,
-    val baseUrl: String = rule.baseUrl,
-    val http: HttpOptions = HttpOptions(),
+    val rule: RuleSpec,
 ) {
-    val headers: Map<String, String> get() = http.headers
+    val ruleId: String get() = rule.id
+    val baseUrl: String get() = rule.baseUrl
+
+    fun headers(): Map<String, String> = buildMap {
+        put("User-Agent", DEFAULT_USER_AGENT)
+        putAll(rule.http.headerMap)
+        putAll(rule.headers)
+    }
+
+    companion object {
+        const val DEFAULT_USER_AGENT = "MangaReader/0.1 (+https://github.com/1700563146/MangaReader)"
+    }
 }
 
-data class HttpOptions(
-    val timeoutMs: Int = 15_000,
-    val retry: Int = 2,
-    val allowCleartext: Boolean = false,
-    val userAgent: String? = null,
-    val headers: Map<String, String> = emptyMap(),
+data class SearchPage(
+    val items: List<ComicSummary>,
+    val hasNext: Boolean,
 )
 
-data class SearchPage(
-    val items: List<Comic>,
-    val hasNext: Boolean,
+data class ComicSummary(
+    val cid: String,
+    val title: String,
+    val cover: String = "",
+    val author: String? = null,
+    val update: String? = null,
+    val finish: Boolean? = null,
+    val url: String? = null,
+)
+
+data class ComicDetail(
+    val summary: ComicSummary,
+    val intro: String? = null,
+    val chapters: List<ChapterInfo> = emptyList(),
+)
+
+data class ChapterInfo(
+    val title: String,
+    val path: String,
+    val group: String = "",
 )
 
 data class ImagePage(
@@ -53,6 +72,25 @@ data class ImagePage(
     val lazy: Boolean = false,
     val total: Int = images.size,
 )
+
+data class ImageRef(
+    val url: String,
+    val urls: List<String> = emptyList(),
+    val lazy: Boolean = false,
+    val headers: Map<String, String> = emptyMap(),
+)
+
+/**
+ * 引擎内部统一异常：带错误码、失败步骤与规则位置，UI 据此选择文案与恢复动作。
+ */
+class SourceFailure(
+    val code: ErrorCode,
+    message: String,
+    val step: String? = null,
+    val pointer: String? = null,
+    val retryable: Boolean = false,
+    cause: Throwable? = null,
+) : Exception(message, cause)
 
 /**
  * 域名白名单匹配：`*.example.com` 匹配子域但不匹配裸域，`example.com` 精确匹配。

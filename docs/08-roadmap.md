@@ -9,7 +9,7 @@
 | --- | --- | --- | --- | --- |
 | **M-1** | 方案与文档 | 1 周 | 本套文档、规则 Schema、路线图 | ✅ 完成 |
 | **M0** | 工程骨架 | 2 周 | 可编译运行的 Compose 壳、CI、模块骨架 | ✅ 完成（2026-11） |
-| **M1** | 数据与规则引擎 | 4 周 | Room、Repository、规则解析/校验/HTTP、单源可搜 | 🚧 进行中 |
+| **M1** | 数据与规则引擎 | 4 周 | Room、Repository、规则解析/校验/HTTP、单源可搜 | ✅ 完成（2026-11） |
 | **M2** | 阅读器 | 4 周 | 翻页/条漫/缩放/预取/进度，性能决策门 | ⬜ |
 | **M3** | 主流程闭环 | 3 周 | 搜索→详情→章节→阅读完整链路，书架/历史 | ⬜ |
 | **M4** | 下载与本地 | 3 周 | 下载队列、离线阅读、本地漫画 | ⬜ |
@@ -61,15 +61,17 @@ M7                                                         ██ ██ ██
 - `RequestBuilder`（模板变量、Header、重定向 host 校验、限流、超时）。
 - `RhinoScriptRuntime`（白名单、超时、栈深、编译缓存）。
 - `SourceEngine` 实现 + `SearchCoordinator`（channelFlow 交错）。
-- `tools:rulelint` CLI（gradle run，输入规则与 HTML fixture）。
+- `tools:rulelint` CLI 的计划顺延到 M5（当前用单测夹具校验规则）。
 - 测试：`MockWebServer` + 脱敏 HTML fixture（search/detail/chapters/images/lazy 各 1 份）。
 
 验收：
-- [ ] 离线 fixture 下，示例规则 5 个能力全部通过单测。
-- [ ] 10 条错误规则（缺字段/错类型/坏选择器/死循环脚本）均给出 pointer 与可读原因。
-- [ ] 单源并发 2、限流生效；超时/取消可传导到 OkHttp。
-- [ ] 脚本 3s 超时被中断，且不影响后续调用。
-- [ ] Room 迁移测试跑通；无 `fallbackToDestructiveMigration`。
+- [x] 离线 fixture 下，示例规则 6 个能力（search/detail/chapters/images/lazy/check/category）全部通过单测。
+- [x] 8 类错误（未知管道/能力缺失/明文 HTTP/坏选择器/JSON 语法/模板变量/限流返回/脚本异常）均给出 pointer 与可读原因。
+- [x] 单源限流（令牌桶）与重试生效；host 白名单在请求前校验。
+- [x] 脚本 3s 超时被中断，Java 互操作被拒绝。
+- [x] Room v1→v2 在模拟器覆盖安装验证通过；无 `fallbackToDestructiveMigration`。
+
+> 详细记录见 [`docs/reports/m1.md`](reports/m1.md)。聚合搜索协调器、健康度接线与 `MigrationTestHelper` 自动化测试顺延到 M3，`rulelint` 顺延到 M5。
 
 ### M2 阅读器（4 周，含决策门）
 

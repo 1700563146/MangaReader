@@ -18,6 +18,20 @@
 
 - 明确零内置源、规则沙箱、签名与撤销机制、实名投诉通道。
 
+## [0.2.0-M1] - 2026-11-04
+
+### Added
+
+- Room v2：源、漫画、章节、标签、下载、搜索历史、本地扫描根，含显式迁移与 DAO/Repository。
+- 规则编译器：模板变量、CSS/JSONPath 选择器、管道变换、L1/L2 校验与 JSON Pointer 报错。
+- HTTP 客户端：模板请求、host 白名单、明文闸门、重定向校验、令牌桶限流、重试、Cookie。
+- Rhino 脚本沙箱：拒绝 Java 互操作、3s 超时、栈深限制、`doc()/util/http/cache/log` 白名单 API。
+- `JsonRuleEngine`：search/detail/chapters/images/lazy/check/category 全能力，MockWebServer 端到端测试。
+
+### Changed
+
+- `SourceEngine` 契约改为携带强类型 `RuleSpec`，供引擎直接执行。
+
 ## [0.1.0-M0] - 2026-11-04
 
 ### Added

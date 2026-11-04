@@ -57,7 +57,7 @@ feature/<name>/
 ### 3.1 格式化与静态检查
 
 - **Android Lint**：`lint { abortOnError = true }`，CI 执行 `:app:lintDebug`；`baseline.xml` 不提交（单人项目直接修）。
-- **ktlint / Detekt**：M1 接入 ktlint，M7 前接入 Detekt（`config/detekt/detekt.yml`）；当前以 IDE 格式化 + review 保证一致性，CI 暂不阻断。
+- **ktlint / Detekt**：M7 硬化阶段接入（`spotless` + ktlint、Detekt）；当前以 IDE 格式化 + review 保证一致性，CI 暂不阻断。
 - 新增代码优先修 lint warning，不允许新增 `@Suppress`（除非注释说明原因）。
 
 ### 3.2 Kotlin 风格
