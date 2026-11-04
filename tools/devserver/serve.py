@@ -51,7 +51,7 @@ def detail_html(cid: int) -> str:
         <a class="author">作者 {cid}</a>
         <div class="intro"><p>这是一部仅用于开发测试的占位漫画，没有任何真实内容。</p></div>
         <span class="status">连载</span>
-        <span class="update">更新至第3话</span>
+        <span class="update">更新至第4话</span>
       </div>
       <ul class="chapter-list">
         <li><a href="/chapter/{cid}/3/">第3话</a></li>

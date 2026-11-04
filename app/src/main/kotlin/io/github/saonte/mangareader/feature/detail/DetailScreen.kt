@@ -1,6 +1,8 @@
 package io.github.saonte.mangareader.feature.detail
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -69,8 +72,15 @@ fun DetailScreen(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.End,
         ) {
-            TextButton(onClick = viewModel::toggleChapterOrder) {
-                Text(if (state.chaptersDescending) "正序" else "倒序")
+            if (state.selectionMode) {
+                TextButton(onClick = viewModel::clearChapterSelection) { Text("取消") }
+                TextButton(onClick = viewModel::downloadSelected) {
+                    Text("下载(${state.selectedChapters.size})")
+                }
+            } else {
+                TextButton(onClick = viewModel::toggleChapterOrder) {
+                    Text(if (state.chaptersDescending) "正序" else "倒序")
+                }
             }
             TextButton(
                 enabled = state.chapters.isNotEmpty(),
@@ -178,7 +188,16 @@ fun DetailScreen(
                 ChapterRow(
                     chapter = chapter,
                     download = state.downloads[chapter.id],
-                    onClick = { viewModel.openChapter(chapter, index, onOpenReader) },
+                    selected = chapter.id in state.selectedChapters,
+                    selectionMode = state.selectionMode,
+                    onClick = {
+                        if (state.selectionMode) {
+                            viewModel.toggleChapterSelection(chapter.id)
+                        } else {
+                            viewModel.openChapter(chapter, index, onOpenReader)
+                        }
+                    },
+                    onLongClick = { viewModel.toggleChapterSelection(chapter.id) },
                     onDownloadAction = { viewModel.onDownloadAction(chapter) },
                 )
                 HorizontalDivider()
@@ -190,17 +209,21 @@ fun DetailScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ChapterRow(
     chapter: Chapter,
     download: DownloadTask?,
+    selected: Boolean,
+    selectionMode: Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     onDownloadAction: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -213,6 +236,9 @@ private fun ChapterRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+        if (selectionMode) {
+            Checkbox(checked = selected, onCheckedChange = { onClick() })
         }
         if (chapter.readAt != null) {
             Text(

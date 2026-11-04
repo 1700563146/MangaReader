@@ -24,6 +24,7 @@ import io.github.saonte.mangareader.reader.ProgressSink
 import io.github.saonte.mangareader.reader.ReaderController
 import io.github.saonte.mangareader.reader.ui.ReaderScreen
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun ReaderRouteScreen(
@@ -73,6 +74,14 @@ fun ReaderRouteScreen(
             }
             LaunchedEffect(prefs.mode) { controller.setMode(prefs.mode) }
             LaunchedEffect(prefs.doublePage) { controller.setDoublePage(prefs.doublePage) }
+            session.notice?.let { notice ->
+                androidx.compose.material3.Snackbar(
+                    modifier = androidx.compose.ui.Modifier.padding(16.dp),
+                    action = {
+                        TextButton(onClick = { viewModel.dismissNotice() }) { Text("知道了") }
+                    },
+                ) { Text(notice) }
+            }
             ReaderScreen(
                 controller = controller,
                 pageSource = session.pageSource,

@@ -37,6 +37,8 @@ data class DetailUiState(
     val message: String? = null,
     val downloads: Map<Long, DownloadTask> = emptyMap(),
     val chaptersDescending: Boolean = false,
+    val selectedChapters: Set<Long> = emptySet(),
+    val selectionMode: Boolean = false,
 )
 
 @HiltViewModel
@@ -61,6 +63,7 @@ class DetailViewModel @Inject constructor(
 
     init {
         load()
+        clearHighlight()
         viewModelScope.launch {
             settings.chaptersDescending.collect { descending ->
                 _state.update { current ->
@@ -178,12 +181,20 @@ class DetailViewModel @Inject constructor(
         }
     }
 
+    /**
+     * F-303：优先上次章节；章节被源删除时回退到「索引最近」的可用章节，
+     * 而不是跳回第一话，避免长连载进度错乱。
+     */
     fun continueReading(onReady: (comicId: Long, chapterPath: String) -> Unit) {
         val state = _state.value
-        val index = state.chapters.indexOfFirst { it.path == state.comic?.lastChapterPath }
-            .takeIf { it >= 0 }
-            ?: state.chapters.indexOfFirst { it.readAt == null }.takeIf { it >= 0 }
-            ?: 0
+        val comic = state.comic
+        val lastIndex = comic?.lastChapterIndex ?: 0
+        val byPath = state.chapters.indexOfFirst { it.path == comic?.lastChapterPath }
+        val index = when {
+            byPath >= 0 -> byPath
+            state.chapters.isEmpty() -> -1
+            else -> lastIndex.coerceIn(0, state.chapters.lastIndex)
+        }
         state.chapters.getOrNull(index)?.let { openChapter(it, index, onReady) }
     }
 
@@ -207,6 +218,59 @@ class DetailViewModel @Inject constructor(
                 DownloadState.PAUSED, DownloadState.FAILED -> downloads.resume(chapter.id)
                 DownloadState.COMPLETED -> Unit
             }
+        }
+    }
+
+    /**
+     * F-104：进入详情即清除「有新章节」高亮。
+     * 依赖 route 而非 comicId——init 时详情尚未加载，comicId 还是 0。
+     */
+    fun clearHighlight() {
+        viewModelScope.launch {
+            val id = comicId.takeIf { it > 0 }
+                ?: comics.findBySource(route.sourceType, route.cid)?.id
+                ?: return@launch
+            comics.clearHighlight(id)
+        }
+    }
+
+    /** F-305：长按章节进入多选，批量下载所选。 */
+    fun toggleChapterSelection(chapterId: Long) {
+        _state.update { current ->
+            val next = if (chapterId in current.selectedChapters) {
+                current.selectedChapters - chapterId
+            } else {
+                current.selectedChapters + chapterId
+            }
+            current.copy(selectedChapters = next, selectionMode = next.isNotEmpty())
+        }
+    }
+
+    fun clearChapterSelection() {
+        _state.update { it.copy(selectedChapters = emptySet(), selectionMode = false) }
+    }
+
+    fun downloadSelected() {
+        val comic = _state.value.comic ?: return
+        val selected = _state.value.chapters.filter { it.id in _state.value.selectedChapters }
+        if (selected.isEmpty()) return
+        viewModelScope.launch {
+            selected.forEach { chapter ->
+                if (!chapter.downloaded) {
+                    downloads.enqueue(
+                        DownloadRequest(
+                            comicId = comic.id,
+                            chapterId = chapter.id,
+                            sourceType = comic.source,
+                            cid = comic.cid,
+                            chapterPath = chapter.path,
+                            title = chapter.title,
+                        ),
+                    )
+                }
+            }
+            _state.update { it.copy(message = "已加入下载队列：${selected.size} 章") }
+            clearChapterSelection()
         }
     }
 

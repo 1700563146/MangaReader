@@ -43,6 +43,7 @@ data class ReaderSession(
     val chapter: Chapter,
     val chapterIndex: Int,
     val pageSource: PageSource,
+    val notice: String? = null,
 )
 
 sealed interface ReaderSessionState {
@@ -78,6 +79,13 @@ class ReaderViewModel @Inject constructor(
         initialValue = ReaderPreferences(),
     )
 
+    fun dismissNotice() {
+        val current = _state.value
+        if (current is ReaderSessionState.Ready && current.session.notice != null) {
+            _state.value = current.copy(session = current.session.copy(notice = null))
+        }
+    }
+
     fun setModePreference(mode: ReadMode) {
         viewModelScope.launch { settings.setReaderMode(mode) }
     }
@@ -94,12 +102,25 @@ class ReaderViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = ReaderSessionState.Loading
             var loadedSource: Long? = null
+            var fallbackNotice: String? = null
             runCatching {
                 val comic = comics.findById(route.comicId) ?: error("漫画不存在")
                 loadedSource = comic.source.takeIf { it > 0 }
                 val chapterList = chapters.list(comic.id)
-                val index = chapterList.indexOfFirst { it.path == route.chapterPath }
-                val chapter = chapterList.getOrNull(index) ?: error("章节不存在或已被源移除")
+                val exact = chapterList.indexOfFirst { it.path == route.chapterPath }
+                // F-303：目标章节被源移除时，回退到索引最近的可用章节并提示。
+                val index = if (exact >= 0) {
+                    exact
+                } else {
+                    chapterList.lastIndex.coerceAtLeast(0).let { last ->
+                        comic.lastChapterIndex.coerceIn(0, last)
+                    }
+                }
+                val chapter = chapterList.getOrNull(index)
+                    ?: error("章节不存在或已被源移除")
+                if (exact < 0) {
+                    fallbackNotice = "原章节已失效，已切换到「${chapter.title}」"
+                }
                 val offlineDir = downloads.completedDir(chapter.id)
                 val pageSource = if (comic.local) {
                     LocalPageSource(
@@ -127,6 +148,7 @@ class ReaderViewModel @Inject constructor(
                     chapter = chapter,
                     chapterIndex = index.coerceAtLeast(0),
                     pageSource = pageSource,
+                    notice = fallbackNotice,
                 )
             }.onSuccess { session ->
                 sources.recordSuccess(session.comic.source)
