@@ -17,6 +17,7 @@ class JsonRuleEngineTest {
     private lateinit var server: MockWebServer
     private lateinit var engine: JsonRuleEngine
     private lateinit var ref: SourceRef
+    private lateinit var baseUrl: String
 
     private val searchHtml = """
         <ul class="result">
@@ -82,7 +83,8 @@ class JsonRuleEngineTest {
         }
         server.start()
 
-        val base = server.url("/").toString().trimEnd('/').replace("localhost", "127.0.0.1")
+        baseUrl = server.url("/").toString().trimEnd('/').replace("localhost", "127.0.0.1")
+        val base = baseUrl
         val raw = checkNotNull(javaClass.getResource("/rules/demo-source.json")).readText()
             .replace("https://example.com", base)
             .replace("\"hosts\": [\"example.com\"]", "\"hosts\": [\"127.0.0.1\"]")
@@ -107,7 +109,7 @@ class JsonRuleEngineTest {
         assertThat(page.items).hasSize(2)
         assertThat(page.items[0].cid).isEqualTo("42")
         assertThat(page.items[0].title).isEqualTo("示例漫画")
-        assertThat(page.items[0].cover).isEqualTo("${server.url("/")}img/42.jpg")
+        assertThat(page.items[0].cover).isEqualTo("$baseUrl/img/42.jpg")
         assertThat(page.items[0].finish).isFalse()
         assertThat(page.items[1].finish).isTrue()
         assertThat(page.hasNext).isTrue()
@@ -122,7 +124,7 @@ class JsonRuleEngineTest {
         assertThat(detail.intro).contains("简介")
         assertThat(detail.intro).doesNotContain("<p>")
         assertThat(detail.chapters.map { it.title }).containsExactly("第1话", "第2话").inOrder()
-        assertThat(detail.chapters[0].path).isEqualTo("${server.url("/")}chapter/1/")
+        assertThat(detail.chapters[0].path).isEqualTo("$baseUrl/chapter/1/")
     }
 
     @Test
@@ -135,29 +137,29 @@ class JsonRuleEngineTest {
 
     @Test
     fun `images resolve absolute urls with referer`() = runBlocking {
-        val page = engine.images(ref, "42", "${server.url("/")}chapter/1/")
+        val page = engine.images(ref, "42", "$baseUrl/chapter/1/")
 
         assertThat(page.lazy).isFalse()
         assertThat(page.images.map { it.url }).containsExactly(
-            "${server.url("/")}img/1.jpg",
-            "${server.url("/")}img/2.jpg",
+            "$baseUrl/img/1.jpg",
+            "$baseUrl/img/2.jpg",
         ).inOrder()
-        assertThat(page.images.first().headers["Referer"]).isEqualTo("${server.url("/")}chapter/1/")
+        assertThat(page.images.first().headers["Referer"]).isEqualTo("$baseUrl/chapter/1/")
     }
 
     @Test
     fun `lazy image resolves through json request`() = runBlocking {
         val raw = checkNotNull(javaClass.getResource("/rules/demo-source.json")).readText()
-            .replace("https://example.com", server.url("/").toString().trimEnd('/'))
+            .replace("https://example.com", baseUrl)
             .replace("\"hosts\": [\"example.com\"]", "\"hosts\": [\"127.0.0.1\"]")
             .replace("\"allowCleartext\": false", "\"allowCleartext\": true")
             .replace("\"enabled\": false", "\"enabled\": true")
         val compiled = RuleCompiler().compile(raw) as RuleCompileResult.Success
         val lazyRef = SourceRef(2, compiled.rule)
 
-        val image = engine.lazyImage(lazyRef, "42", "${server.url("/")}chapter/1/", 0)
+        val image = engine.lazyImage(lazyRef, "42", "$baseUrl/chapter/1/", 0)
 
-        assertThat(image.url).isEqualTo("${server.url("/")}img/lazy-0.jpg")
+        assertThat(image.url).isEqualTo("$baseUrl/img/lazy-0.jpg")
         assertThat(image.lazy).isTrue()
     }
 
