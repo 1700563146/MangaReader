@@ -19,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -107,6 +109,8 @@ fun RulesScreen(
             issues = state.issues,
             onDismiss = viewModel::dismissImport,
             onInstall = viewModel::install,
+            onPickFile = viewModel::installFromUri,
+            onInstallUrl = viewModel::installFromUrl,
         )
     }
 }
@@ -164,9 +168,15 @@ private fun ImportDialog(
     issues: List<io.github.saonte.mangareader.source.rule.RuleIssue>,
     onDismiss: () -> Unit,
     onInstall: (String) -> Unit,
+    onPickFile: (android.net.Uri) -> Unit,
+    onInstallUrl: (String) -> Unit,
 ) {
     var text by rememberSaveable { mutableStateOf("") }
+    var url by rememberSaveable { mutableStateOf("") }
     val clipboard = LocalClipboardManager.current
+    val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let(onPickFile)
+    }
 
     AlertDialog(
         onDismissRequest = { if (!importing) onDismiss() },
@@ -188,9 +198,29 @@ private fun ImportDialog(
                             clipboard.getText()?.text?.let { text = it }
                         },
                     ) { Text(stringResource(R.string.rules_paste)) }
+                    TextButton(
+                        enabled = !importing,
+                        onClick = { filePicker.launch(arrayOf("application/json", "text/plain", "*/*")) },
+                    ) { Text("从文件") }
                     if (importing) {
                         CircularProgressIndicator(modifier = Modifier.padding(8.dp))
                     }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    OutlinedTextField(
+                        value = url,
+                        onValueChange = { url = it },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        placeholder = { Text("https://…/rule.json") },
+                    )
+                    TextButton(
+                        enabled = !importing && url.startsWith("https://"),
+                        onClick = { onInstallUrl(url) },
+                    ) { Text("下载") }
                 }
                 issues.forEach { issue ->
                     Text(

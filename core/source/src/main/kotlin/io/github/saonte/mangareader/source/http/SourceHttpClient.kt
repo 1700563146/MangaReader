@@ -142,6 +142,38 @@ class SourceHttpClient(
     }
 
     /**
+     * 规则导入用的纯文本抓取：仅 https，不绑定已安装源（规则尚未入库），
+     * 因此不使用 host 白名单；限制大小与超时，避免被当作通用下载器。
+     */
+    suspend fun fetchRuleText(url: String, maxBytes: Long): String {
+        if (!url.startsWith("https://")) {
+            throw SourceFailure(ErrorCode.NET_TLS, "规则地址必须为 https", step = "import")
+        }
+        val request = Request.Builder().url(url).header("Accept", "application/json").build()
+        return withContext(Dispatchers.IO) {
+            val call = httpClient.newCall(request)
+            call.timeout().timeout(15, java.util.concurrent.TimeUnit.SECONDS)
+            try {
+                call.execute().use { resp ->
+                    if (!resp.isSuccessful) {
+                        throw SourceFailure(httpErrorCode(resp.code), "HTTP ${resp.code}", step = "import")
+                    }
+                    val declared = resp.body?.contentLength() ?: -1
+                    if (declared > maxBytes) {
+                        throw SourceFailure(ErrorCode.UNKNOWN, "规则文件超过上限", step = "import")
+                    }
+                    val bytes = readBounded(resp, maxBytes)
+                    bytes.toString(Charsets.UTF_8)
+                }
+            } catch (e: SourceFailure) {
+                throw e
+            } catch (e: IOException) {
+                throw SourceFailure(ErrorCode.NET_TIMEOUT, "下载规则失败：${e.message}", step = "import", cause = e)
+            }
+        }
+    }
+
+    /**
      * 供脚本钩子使用的同步请求：独立 10s 超时，仍走 host 白名单与明文闸门，不做重试。
      */
     fun fetchBlocking(
@@ -302,14 +334,14 @@ class SourceHttpClient(
         }
     }
 
-    private fun readBounded(response: Response): ByteArray {
+    private fun readBounded(response: Response, limit: Long = MAX_BYTES): ByteArray {
         val contentLength = response.body?.contentLength() ?: -1
-        if (contentLength > MAX_BYTES) {
+        if (contentLength > limit) {
             throw SourceFailure(ErrorCode.RESPONSE_TOO_LARGE, "响应体过大：$contentLength", step = "http")
         }
         val bytes = response.body?.bytes() ?: ByteArray(0)
-        if (bytes.size > MAX_BYTES) {
-            throw SourceFailure(ErrorCode.RESPONSE_TOO_LARGE, "响应体超过 8MB", step = "http")
+        if (bytes.size > limit) {
+            throw SourceFailure(ErrorCode.RESPONSE_TOO_LARGE, "响应体超过上限：${bytes.size}", step = "http")
         }
         return bytes
     }
