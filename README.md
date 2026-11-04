@@ -7,7 +7,9 @@
 [![Platform](https://img.shields.io/badge/Android-8.0%2B%20(API%2026)-3DDC84.svg)](https://developer.android.com)
 [![Status](https://img.shields.io/badge/status-docs%20phase-orange.svg)](docs/08-roadmap.md)
 
-> **当前状态：文档阶段（M0 之前）。** 本仓库目前只包含需求、架构、规则规范与路线图，代码骨架将在 M0 按 [`docs/08-roadmap.md`](docs/08-roadmap.md) 落地。
+> **当前状态：M0 完成（工程骨架可构建运行），M1 数据与规则引擎进行中。** 详见 [`docs/08-roadmap.md`](docs/08-roadmap.md)。
+
+![书架空状态（M0）](docs/screenshots/m0-shelf.png)
 
 ---
 
@@ -93,13 +95,17 @@ MangaReader 是一个**本地优先、无账号、无云端**的漫画阅读器�
 - [Tachiyomi / Mihon](https://github.com/mihonapp/mihon) —— 扩展生态与阅读器交互
 - [Kotatsu](https://github.com/KotatsuApp/Kotatsu) —— 规则与源管理产品化
 
-## 构建（M0 之后可用）
+## 构建
+
+环境：JDK 17+、Android SDK 35。
 
 ```bash
 ./gradlew :app:assembleDebug        # 调试包
-./gradlew spotlessCheck lint testDebugUnitTest
-./gradlew :app:assembleRelease      # 需 signing 配置（见 docs/09-engineering.md）
+./gradlew test :app:lintDebug       # 单元测试 + Lint
+./gradlew :app:assembleRelease      # Release（当前使用本地 debug 签名，M7 接入正式签名）
 ```
+
+M0 的构建与运行验证记录见 [`docs/reports/m0.md`](docs/reports/m0.md)。
 
 ## 贡献
 

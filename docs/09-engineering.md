@@ -33,7 +33,7 @@ MangaReader/
 │   ├── source/              # 规则引擎、HTTP、脚本沙箱
 │   ├── reader/              # Compose 阅读器、图片流水线
 │   └── storage/             # 下载、本地、备份
-├── build-logic/             # 约定插件
+├── build-logic/             # 约定插件（M1 起逐步引入）
 ├── baselineprofile/         # Baseline Profile 生成
 ├── benchmark/               # Macrobenchmark
 ├── tools/rulelint/          # 规则校验 CLI
@@ -56,10 +56,9 @@ feature/<name>/
 
 ### 3.1 格式化与静态检查
 
-- **Spotless**：`ktlint`（Kotlin）+ `ktfmt`? 二选一，**本项目用 ktlint**（`spotless` + `ktlint` 插件）。
-- **Detekt**：`config/detekt/detekt.yml`，基线为「复杂度/长函数/魔法数字/命名」；新增 issue 不允许。
-- **Android Lint**：`lint { warningsAsErrors = false; abortOnError = true; checkReleaseBuilds = true }`，`baseline.xml` 不提交（单人项目直接修）。
-- 提交前 `./gradlew spotlessApply detekt`；CI 用 `spotlessCheck`。
+- **Android Lint**：`lint { abortOnError = true }`，CI 执行 `:app:lintDebug`；`baseline.xml` 不提交（单人项目直接修）。
+- **ktlint / Detekt**：M1 接入 ktlint，M7 前接入 Detekt（`config/detekt/detekt.yml`）；当前以 IDE 格式化 + review 保证一致性，CI 暂不阻断。
+- 新增代码优先修 lint warning，不允许新增 `@Suppress`（除非注释说明原因）。
 
 ### 3.2 Kotlin 风格
 
@@ -141,7 +140,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21', cache: gradle }
-      - run: ./gradlew spotlessCheck detekt lint testDebugUnitTest assembleDebug --stacktrace
+      - run: ./gradlew --no-daemon :app:assembleDebug :app:lintDebug test --stacktrace
       - uses: actions/upload-artifact@v4
         with: { name: debug-apk, path: app/build/outputs/apk/debug/*.apk }
 ```
@@ -188,7 +187,7 @@ jobs:
 
 ## 9. AI 协作约定（AGENTS.md 摘要）
 
-- AI 生成代码同样适用本规范；提交前必须本地跑 `spotlessCheck detekt testDebugUnitTest`。
+- AI 生成代码同样适用本规范；提交前必须本地跑 `./gradlew test :app:lintDebug`。
 - 禁止 AI 生成或补全「真实站点解析规则」「漫画内容」「绕过 DRM」相关代码。
 - AI 修改文档时不得改变 ADR 结论；如需变更，先提 issue 讨论。
 - 所有 AI 产出需人工复核：安全边界、许可证、错误处理、测试有效性。

@@ -264,30 +264,30 @@ sealed interface AppError {
 
 ## 8. 依赖基线
 
-> M0 用 Version Catalog 锁定并写回本表；以下为**计划基线**，实施时替换为当时稳定版。
+> M0 已在 [`gradle/libs.versions.toml`](../gradle/libs.versions.toml) 锁定下列版本；升级须单独 PR 并跑通全量测试。
 
-| 依赖 | 基线 | 用途 | 许可证 |
+| 依赖 | 锁定版本 | 用途 | 许可证 |
 | --- | --- | --- | --- |
-| AGP / Gradle | 8.7+ / 8.9+ | 构建 | Apache-2.0 |
-| Kotlin | 2.1.x | 全栈语言 | Apache-2.0 |
-| Compose BOM | 2025.01+ | UI | Apache-2.0 |
+| AGP / Gradle | 8.13.1 / 8.14 | 构建 | Apache-2.0 |
+| Kotlin | 2.2.20 | 全栈语言 | Apache-2.0 |
+| Compose BOM | 2025.11.01 | UI | Apache-2.0 |
 | Compose Compiler | 随 Kotlin（`compose` 插件） | 编译 | Apache-2.0 |
-| Hilt | 2.52+（KSP） | DI | Apache-2.0 |
-| Room | 2.6.1+（KSP） | DB | Apache-2.0 |
-| Paging | 3.3+ | 列表分页 | Apache-2.0 |
-| Navigation-Compose | 2.8+（类型安全路由） | 导航 | Apache-2.0 |
-| OkHttp | 4.12+ | HTTP | Apache-2.0 |
-| jsoup | 1.18+ | HTML | MIT |
-| Rhino | 1.7.15+ | JS 沙箱 | MPL-2.0 |
-| kotlinx-serialization | 1.7+ | JSON/规则/备份 | Apache-2.0 |
-| kotlinx-coroutines | 1.9+ | 协程 | Apache-2.0 |
-| Coil | 3.x | 图片 | Apache-2.0 |
-| DataStore | 1.1+ | 设置 | Apache-2.0 |
-| WorkManager | 2.9+ | 后台任务 | Apache-2.0 |
+| Hilt | 2.57.2（KSP） | DI | Apache-2.0 |
+| Room | 2.8.3（KSP） | DB | Apache-2.0 |
+| Paging | 3.4.2 | 列表分页 | Apache-2.0 |
+| Navigation-Compose | 2.9.5（类型安全路由） | 导航 | Apache-2.0 |
+| OkHttp | 4.12.0 | HTTP | Apache-2.0 |
+| jsoup | 1.22.1 | HTML | MIT |
+| Rhino | 1.7.15 | JS 沙箱 | MPL-2.0 |
+| kotlinx-serialization | 1.9.0 | JSON/规则/备份 | Apache-2.0 |
+| kotlinx-coroutines | 1.10.2 | 协程 | Apache-2.0 |
+| Coil | 3.3.0 | 图片 | Apache-2.0 |
+| DataStore | 1.1.7 | 设置 | Apache-2.0 |
+| WorkManager | 2.10.5 | 后台任务 | Apache-2.0 |
 | Baseline Profile | AGP 内置 | 性能 | Apache-2.0 |
-| JUnit5 + MockK + Turbine + MockWebServer | 最新 | 测试 | EPL-2.0 / Apache-2.0 |
-| Robolectric / Compose UI Test | 最新 | Android 测试 | MIT / Apache-2.0 |
-| Detekt / ktlint | 最新 | 静态检查 | Apache-2.0 |
+| JUnit4 / JUnit5 + Truth + MockK + Turbine + MockWebServer | 4.13.2 / 5.11.4 / 1.4.4 / 1.14.2 / 1.2.0 / 4.12.0 | 测试 | EPL-2.0 / Apache-2.0 |
+| Robolectric / Compose UI Test | 4.x / BOM 内 | Android 测试 | MIT / Apache-2.0 |
+| Detekt / ktlint | 待接入（M1/M7） | 静态检查 | Apache-2.0 |
 
 **不引入**：Firebase 全家桶、广告 SDK、统计 SDK、闭源加固（ADR-008）。
 
