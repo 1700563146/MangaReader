@@ -78,6 +78,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:source"))
+    implementation(project(":core:source-cjs"))
     implementation(project(":core:reader"))
     implementation(project(":core:storage"))
     implementation(project(":core:designsystem"))
@@ -117,4 +118,5 @@ dependencies {
     androidTestImplementation(composeBom)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
