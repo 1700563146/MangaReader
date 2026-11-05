@@ -2,7 +2,7 @@ package io.github.saonte.mangareader.source.script
 
 import io.github.saonte.mangareader.model.ErrorCode
 import io.github.saonte.mangareader.source.SourceFailure
-import io.github.saonte.mangareader.source.SourceRef
+import io.github.saonte.mangareader.source.RuleSourceRef
 import io.github.saonte.mangareader.source.http.HttpResponse
 import io.github.saonte.mangareader.source.http.SourceHttpClient
 import io.github.saonte.mangareader.source.rule.PipeOp
@@ -41,7 +41,7 @@ data class ScriptCall(
     val url: String,
     val html: String? = null,
     val json: String? = null,
-    val ref: SourceRef? = null,
+    val ref: RuleSourceRef? = null,
     val httpClient: SourceHttpClient? = null,
     val timeoutMs: Long = 3_000,
 )

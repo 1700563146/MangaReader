@@ -36,6 +36,9 @@ data object DownloadsRoute
 data object BackupRoute
 
 @Serializable
+data object SourceLibraryRoute
+
+@Serializable
 data object LocalRoute
 
 @Serializable

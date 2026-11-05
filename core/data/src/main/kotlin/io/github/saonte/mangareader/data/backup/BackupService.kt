@@ -151,6 +151,7 @@ class BackupService @Inject constructor(
                             originUrl = existing.originUrl,
                             trust = source.trust,
                             usedAt = existing.lastUsedAt,
+                            sourceKind = existing.sourceKind,
                         )
                         existing.type
                     }

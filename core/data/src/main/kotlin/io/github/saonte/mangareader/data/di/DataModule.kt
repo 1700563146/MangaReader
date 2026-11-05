@@ -15,6 +15,7 @@ import io.github.saonte.mangareader.data.db.ComicDao
 import io.github.saonte.mangareader.data.db.DownloadTaskDao
 import io.github.saonte.mangareader.data.db.LocalRootDao
 import io.github.saonte.mangareader.data.db.MIGRATION_1_2
+import io.github.saonte.mangareader.data.db.MIGRATION_2_3
 import io.github.saonte.mangareader.data.db.MangaDatabase
 import io.github.saonte.mangareader.data.db.SearchHistoryDao
 import io.github.saonte.mangareader.data.db.SourceDao
@@ -31,7 +32,7 @@ object DataModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): MangaDatabase =
         Room.databaseBuilder(context, MangaDatabase::class.java, MangaDatabase.NAME)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides

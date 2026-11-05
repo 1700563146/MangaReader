@@ -21,7 +21,7 @@ import io.github.saonte.mangareader.model.ErrorCode
 import io.github.saonte.mangareader.model.ImageRef
 import io.github.saonte.mangareader.source.SourceEngine
 import io.github.saonte.mangareader.source.SourceFailure
-import io.github.saonte.mangareader.source.SourceRef
+import io.github.saonte.mangareader.source.RuleSourceRef
 import io.github.saonte.mangareader.source.http.SourceHttpClient
 import io.github.saonte.mangareader.source.rule.RuleCompileResult
 import io.github.saonte.mangareader.source.rule.RuleCompiler
@@ -70,7 +70,7 @@ class DownloadWorker @AssistedInject constructor(
                 ?: throw SourceFailure(ErrorCode.RULE_INVALID, "源不存在", step = "download")
             val rule = (compiler.compile(source.json) as? RuleCompileResult.Success)
                 ?: throw SourceFailure(ErrorCode.RULE_INVALID, "规则无法解析", step = "download")
-            val ref = SourceRef(task.source, rule.rule)
+            val ref = RuleSourceRef(task.source, rule.rule)
             val imagePage = engine.images(ref, task.cid, task.chapterPath)
             val total = when {
                 !imagePage.lazy -> imagePage.images.size

@@ -158,3 +158,15 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_local_root_uri` ON `local_root` (`uri`)")
     }
 }
+
+/**
+ * v2 -> v3：source 表增加 source_kind，用于区分 JSON 规则（0）与 CJS 模块源（1）。
+ * 旧数据全部为 JSON 规则，因此默认值 0 即可，无需回填。
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE `source` ADD COLUMN `source_kind` INTEGER NOT NULL DEFAULT 0",
+        )
+    }
+}

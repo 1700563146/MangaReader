@@ -1,7 +1,7 @@
 package io.github.saonte.mangareader.source.rule
 
 import com.google.common.truth.Truth.assertThat
-import io.github.saonte.mangareader.source.SourceRef
+import io.github.saonte.mangareader.source.RuleSourceRef
 import io.github.saonte.mangareader.source.http.SourceHttpClient
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.Dispatcher
@@ -16,7 +16,7 @@ class JsonRuleEngineTest {
 
     private lateinit var server: MockWebServer
     private lateinit var engine: JsonRuleEngine
-    private lateinit var ref: SourceRef
+    private lateinit var ref: RuleSourceRef
     private lateinit var baseUrl: String
 
     private val searchHtml = """
@@ -93,7 +93,7 @@ class JsonRuleEngineTest {
         check(compiled is RuleCompileResult.Success) {
             (compiled as RuleCompileResult.Failure).issues.joinToString()
         }
-        ref = SourceRef(1, compiled.rule)
+        ref = RuleSourceRef(1, compiled.rule)
         engine = JsonRuleEngine(SourceHttpClient(SourceHttpClient.defaultClient()))
     }
 
@@ -155,7 +155,7 @@ class JsonRuleEngineTest {
             .replace("\"allowCleartext\": false", "\"allowCleartext\": true")
             .replace("\"enabled\": false", "\"enabled\": true")
         val compiled = RuleCompiler().compile(raw) as RuleCompileResult.Success
-        val lazyRef = SourceRef(2, compiled.rule)
+        val lazyRef = RuleSourceRef(2, compiled.rule)
 
         val image = engine.lazyImage(lazyRef, "42", "$baseUrl/chapter/1/", 0)
 

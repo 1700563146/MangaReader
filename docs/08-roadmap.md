@@ -194,6 +194,12 @@ M7                                                         ██ ██ ██
 - [x] 无高危 lint/security 问题；无未声明权限（docs/reports/m7-security.md）。
 - [x] Release APK 可安装、可覆盖升级；正式签名需维护者 keystore（当前回退 debug 签名）。
 
+## 2.5 后续里程碑（1.x）
+
+| 里程碑 | 内容 | 状态 |
+| --- | --- | --- |
+| M8 | 第三方源库浏览/安装、CJS 源格式预留 | ✅ 完成（CJS 引擎待 QuickJS，见 ADR-007） |
+
 ## 3. 首发工单（M0 可直接建 Issue）
 
 | # | 标题 | 标签 | 估算 | 里程碑 |

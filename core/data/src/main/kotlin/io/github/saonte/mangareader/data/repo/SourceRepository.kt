@@ -50,6 +50,7 @@ class SourceRepositoryImpl @Inject constructor(
                 originUrl = rule.originUrl,
                 trust = rule.trust,
                 usedAt = existing.lastUsedAt,
+                sourceKind = rule.kind,
             )
             return existing.type
         }
@@ -65,6 +66,7 @@ class SourceRepositoryImpl @Inject constructor(
                 sha256 = rule.sha256,
                 originUrl = rule.originUrl,
                 trust = rule.trust,
+                sourceKind = rule.kind,
                 installedAt = now,
             ),
         )

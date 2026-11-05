@@ -31,6 +31,6 @@ abstract class MangaDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "mangareader.db"
-        const val VERSION = 2
+        const val VERSION = 3
     }
 }

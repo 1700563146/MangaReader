@@ -1,5 +1,6 @@
 package io.github.saonte.mangareader.source.http
 
+import io.github.saonte.mangareader.source.RuleSourceRef
 import io.github.saonte.mangareader.model.ErrorCode
 import io.github.saonte.mangareader.source.HostMatcher
 import io.github.saonte.mangareader.source.SourceFailure
@@ -54,7 +55,7 @@ class SourceHttpClient(
         .build()
 
     suspend fun execute(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         spec: RequestSpec,
         vars: Map<String, String>,
         extraHeaders: Map<String, String> = emptyMap(),
@@ -95,7 +96,7 @@ class SourceHttpClient(
      * 下载图片：校验 host（hosts ∪ imageHosts）、注入页级 Header，返回原始字节。
      * 单图上限 32MB，失败抛 SourceFailure。
      */
-    fun fetchImageBytes(ref: SourceRef, image: io.github.saonte.mangareader.model.ImageRef): ByteArray {
+    fun fetchImageBytes(ref: RuleSourceRef, image: io.github.saonte.mangareader.model.ImageRef): ByteArray {
         val resolved = resolveUrl(image.url, ref.baseUrl)
         validateUrl(ref, resolved, allowImageHosts = true)
         val builder = Request.Builder().url(resolved)
@@ -145,8 +146,17 @@ class SourceHttpClient(
      * 规则导入用的纯文本抓取：仅 https，不绑定已安装源（规则尚未入库），
      * 因此不使用 host 白名单；限制大小与超时，避免被当作通用下载器。
      */
-    suspend fun fetchRuleText(url: String, maxBytes: Long): String {
-        if (!url.startsWith("https://")) {
+    suspend fun fetchRuleText(
+        url: String,
+        maxBytes: Long,
+        allowInsecureLoopback: Boolean = false,
+    ): String {
+        // 默认只允许 https；allowInsecureLoopback 仅供 debug 端到端验证放行本机 http，
+        // 调用方（SourceLibraryClient）用 BuildConfig.DEBUG 控制，release 不会传入 true。
+        val insecureLoopback = allowInsecureLoopback &&
+            url.startsWith("http://") &&
+            url.removePrefix("http://").substringBefore('/').substringBefore(':') in LOOPBACK_HOSTS
+        if (!url.startsWith("https://") && !insecureLoopback) {
             throw SourceFailure(ErrorCode.NET_TLS, "规则地址必须为 https", step = "import")
         }
         val request = Request.Builder().url(url).header("Accept", "application/json").build()
@@ -177,7 +187,7 @@ class SourceHttpClient(
      * 供脚本钩子使用的同步请求：独立 10s 超时，仍走 host 白名单与明文闸门，不做重试。
      */
     fun fetchBlocking(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         url: String,
         method: String,
         headers: Map<String, String>,
@@ -221,7 +231,7 @@ class SourceHttpClient(
     }
 
     private suspend fun fetchWithRedirects(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         spec: RequestSpec,
         vars: Map<String, String>,
         startUrl: String,
@@ -279,7 +289,7 @@ class SourceHttpClient(
     }
 
     private fun buildRequest(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         spec: RequestSpec,
         vars: Map<String, String>,
         url: String,
@@ -311,7 +321,7 @@ class SourceHttpClient(
         return builder.build()
     }
 
-    private fun validateUrl(ref: SourceRef, url: String, allowImageHosts: Boolean) {
+    private fun validateUrl(ref: RuleSourceRef, url: String, allowImageHosts: Boolean) {
         val uri = runCatching { URI(url) }.getOrElse {
             throw SourceFailure(ErrorCode.RULE_INVALID, "非法 URL：$url", step = "http")
         }
@@ -361,8 +371,8 @@ class SourceHttpClient(
         else -> ErrorCode.UNKNOWN
     }
 
-    private fun bucketFor(ref: SourceRef): TokenBucket =
-        buckets.computeIfAbsent("${ref.type}:${ref.ruleId}") {
+    private fun bucketFor(ref: RuleSourceRef): TokenBucket =
+        buckets.computeIfAbsent("${ref.type}:${ref.sourceId}") {
             TokenBucket(ref.rule.http.rateLimit.rps, ref.rule.http.rateLimit.burst)
         }
 
@@ -373,6 +383,7 @@ class SourceHttpClient(
     }
 
     companion object {
+        private val LOOPBACK_HOSTS = setOf("127.0.0.1", "10.0.2.2", "localhost")
         const val MAX_BYTES = 8L * 1024 * 1024
         const val MAX_IMAGE_BYTES = 32L * 1024 * 1024
 

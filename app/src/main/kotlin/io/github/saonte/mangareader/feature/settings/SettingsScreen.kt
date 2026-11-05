@@ -43,6 +43,7 @@ fun SettingsScreen(
     onOpenDownloads: () -> Unit = {},
     onOpenLocal: () -> Unit = {},
     onOpenBackup: () -> Unit = {},
+    onOpenSourceLibrary: () -> Unit = {},
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val readerMode by viewModel.readerMode.collectAsStateWithLifecycle()
@@ -80,6 +81,12 @@ fun SettingsScreen(
             modifier = Modifier.padding(start = 12.dp),
         ) {
             Text(stringResource(R.string.backup_title))
+        }
+        TextButton(
+            onClick = onOpenSourceLibrary,
+            modifier = Modifier.padding(start = 12.dp),
+        ) {
+            Text("源库")
         }
 
         SectionTitle(stringResource(R.string.settings_appearance))

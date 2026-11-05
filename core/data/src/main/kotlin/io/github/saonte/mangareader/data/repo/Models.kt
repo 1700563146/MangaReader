@@ -39,4 +39,6 @@ data class InstalledRule(
     val sha256: String,
     val originUrl: String?,
     val trust: Int = 1,
+    /** 0 = JSON 规则，1 = CJS 模块源。 */
+    val kind: Int = 0,
 )

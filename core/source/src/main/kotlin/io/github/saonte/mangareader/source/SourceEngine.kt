@@ -2,10 +2,12 @@ package io.github.saonte.mangareader.source
 
 import io.github.saonte.mangareader.model.ErrorCode
 import io.github.saonte.mangareader.model.ImageRef
-import io.github.saonte.mangareader.source.rule.RuleSpec
 
 /**
- * 源引擎的统一入口。v1 由 JSON 规则驱动，UI 只依赖本接口。
+ * 源引擎的统一入口。UI 只依赖本接口，具体格式由 [SourceRef] 子类型决定。
+ *
+ * 实现方按 `ref.kind` 分派；遇到不支持的格式应抛 [SourceFailure]（code = [ErrorCode.RULE_INVALID]），
+ * 而不是静默返回空结果，否则 UI 无法区分「没结果」与「引擎不支持」。
  */
 interface SourceEngine {
     suspend fun search(ref: SourceRef, keyword: String, page: Int): SearchPage
@@ -22,57 +24,6 @@ interface SourceEngine {
 
     suspend fun category(ref: SourceRef, categoryId: String, page: Int): SearchPage
 }
-
-data class SourceRef(
-    val type: Long,
-    val rule: RuleSpec,
-) {
-    val ruleId: String get() = rule.id
-    val baseUrl: String get() = rule.baseUrl
-
-    fun headers(): Map<String, String> = buildMap {
-        put("User-Agent", DEFAULT_USER_AGENT)
-        putAll(rule.http.headerMap)
-        putAll(rule.headers)
-    }
-
-    companion object {
-        const val DEFAULT_USER_AGENT = "MangaReader/0.1 (+https://github.com/1700563146/MangaReader)"
-    }
-}
-
-data class SearchPage(
-    val items: List<ComicSummary>,
-    val hasNext: Boolean,
-)
-
-data class ComicSummary(
-    val cid: String,
-    val title: String,
-    val cover: String = "",
-    val author: String? = null,
-    val update: String? = null,
-    val finish: Boolean? = null,
-    val url: String? = null,
-)
-
-data class ComicDetail(
-    val summary: ComicSummary,
-    val intro: String? = null,
-    val chapters: List<ChapterInfo> = emptyList(),
-)
-
-data class ChapterInfo(
-    val title: String,
-    val path: String,
-    val group: String = "",
-)
-
-data class ImagePage(
-    val images: List<ImageRef>,
-    val lazy: Boolean = false,
-    val total: Int = images.size,
-)
 
 /**
  * 引擎内部统一异常：带错误码、失败步骤与规则位置，UI 据此选择文案与恢复动作。

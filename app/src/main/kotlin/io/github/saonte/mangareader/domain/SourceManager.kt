@@ -3,6 +3,7 @@ package io.github.saonte.mangareader.domain
 import io.github.saonte.mangareader.data.repo.InstalledRule
 import io.github.saonte.mangareader.data.repo.Source
 import io.github.saonte.mangareader.data.repo.SourceRepository
+import io.github.saonte.mangareader.source.RuleSourceRef
 import io.github.saonte.mangareader.source.SourceRef
 import io.github.saonte.mangareader.source.rule.RuleCompiler
 import io.github.saonte.mangareader.source.rule.RuleCompileResult
@@ -41,12 +42,12 @@ class SourceManager @Inject constructor(
 
     suspend fun ref(type: Long): SourceRef? {
         val cached = cache[type]
-        if (cached != null) return SourceRef(type, cached)
+        if (cached != null) return RuleSourceRef(type, cached)
         val source = sources.get(type) ?: return null
         val rule = compileOrNull(source.json) ?: return null
         if (revocations.isRevoked(rule.id, rule.version)) return null
         cache[type] = rule
-        return SourceRef(type, rule)
+        return RuleSourceRef(type, rule)
     }
 
     suspend fun enabledRefs(): List<Pair<Source, SourceRef>> =
@@ -86,6 +87,51 @@ class SourceManager @Inject constructor(
         return InstallResult.Ok(type, rule.name)
     }
 
+    /**
+     * 安装 CJS 模块源。
+     *
+     * 当前引擎（Rhino）不支持 `class` / `async`，因此这里只**登记**源，不编译也不启用；
+     * 运行时 `ref()` 会返回 null，UI 提示「需要更高版本的引擎」。
+     * 这样用户导入的源库不会白丢，未来接入 QuickJS 后可直接启用。
+     */
+    suspend fun installCjs(
+        sourceId: String,
+        name: String,
+        version: String,
+        script: String,
+        origin: String?,
+    ): InstallResult {
+        if (sourceId.isBlank()) {
+            return InstallResult.Invalid(
+                listOf(
+                    RuleIssue(
+                        severity = io.github.saonte.mangareader.source.rule.IssueSeverity.ERROR,
+                        pointer = "/key",
+                        message = "源缺少 id/key",
+                    ),
+                ),
+            )
+        }
+        val type = sources.install(
+            InstalledRule(
+                ruleId = sourceId,
+                title = name,
+                version = version,
+                schemaVersion = CJS_SCHEMA_VERSION,
+                engineMin = CJS_MIN_ENGINE,
+                baseUrl = null,
+                json = script,
+                sha256 = sha256(script),
+                originUrl = origin,
+                trust = 1,
+                kind = 1,
+            ),
+        )
+        // 不启用：引擎尚不能执行
+        sources.setEnabled(type, false)
+        return InstallResult.Ok(type, name)
+    }
+
     suspend fun setEnabled(type: Long, enabled: Boolean) = sources.setEnabled(type, enabled)
 
     suspend fun isRevoked(type: Long): Boolean {
@@ -110,4 +156,12 @@ class SourceManager @Inject constructor(
         MessageDigest.getInstance("SHA-256")
             .digest(raw.toByteArray())
             .joinToString("") { "%02x".format(it) }
+
+    private companion object {
+        /** CJS 源记录的 schemaVersion 占位（与 JSON 规则的 1 区分）。 */
+        const val CJS_SCHEMA_VERSION = 0
+
+        /** CJS 源声明的最低引擎版本，未来由 QuickJS 引擎满足。 */
+        const val CJS_MIN_ENGINE = 2
+    }
 }

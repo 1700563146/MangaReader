@@ -6,8 +6,10 @@ import io.github.saonte.mangareader.source.ComicDetail
 import io.github.saonte.mangareader.source.ComicSummary
 import io.github.saonte.mangareader.model.ImageRef
 import io.github.saonte.mangareader.source.ImagePage
+import io.github.saonte.mangareader.source.RuleSourceRef
 import io.github.saonte.mangareader.source.SearchPage
 import io.github.saonte.mangareader.source.SourceEngine
+import io.github.saonte.mangareader.source.asRule
 import io.github.saonte.mangareader.source.SourceFailure
 import io.github.saonte.mangareader.source.SourceRef
 import io.github.saonte.mangareader.source.http.HttpResponse
@@ -34,7 +36,8 @@ class JsonRuleEngine(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun search(ref: SourceRef, keyword: String, page: Int): SearchPage {
+    override suspend fun search(rawRef: SourceRef, keyword: String, page: Int): SearchPage {
+        val ref = rawRef.asRule()
         val spec = ref.rule.search ?: throw SourceFailure(
             ErrorCode.RULE_INVALID, "规则未实现 search", step = "search", pointer = "/search",
         )
@@ -75,7 +78,8 @@ class JsonRuleEngine(
         return SearchPage(items, hasNext && page < spec.paging.maxPage)
     }
 
-    override suspend fun detail(ref: SourceRef, cid: String): ComicDetail {
+    override suspend fun detail(rawRef: SourceRef, cid: String): ComicDetail {
+        val ref = rawRef.asRule()
         val spec = ref.rule.detail ?: throw SourceFailure(
             ErrorCode.RULE_INVALID, "规则未实现 detail", step = "detail", pointer = "/detail",
         )
@@ -111,7 +115,8 @@ class JsonRuleEngine(
         return ComicDetail(summary = summary, intro = value("intro"), chapters = chapters)
     }
 
-    override suspend fun chapters(ref: SourceRef, cid: String): List<ChapterInfo> {
+    override suspend fun chapters(rawRef: SourceRef, cid: String): List<ChapterInfo> {
+        val ref = rawRef.asRule()
         val spec = ref.rule.chapters
         val request = spec?.request ?: ref.rule.detail?.request
         val response = request?.let { http.execute(ref, it, baseVars(ref) + mapOf("cid" to cid)) }
@@ -120,7 +125,7 @@ class JsonRuleEngine(
     }
 
     private fun chaptersInternal(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         cid: String,
         detailResponse: HttpResponse?,
         detailDocument: Document?,
@@ -152,7 +157,8 @@ class JsonRuleEngine(
         return list.take(spec.max)
     }
 
-    override suspend fun images(ref: SourceRef, cid: String, chapterPath: String): ImagePage {
+    override suspend fun images(rawRef: SourceRef, cid: String, chapterPath: String): ImagePage {
+        val ref = rawRef.asRule()
         val spec = ref.rule.images ?: throw SourceFailure(
             ErrorCode.RULE_INVALID, "规则未实现 images", step = "images", pointer = "/images",
         )
@@ -194,7 +200,8 @@ class JsonRuleEngine(
         return ImagePage(images = refs, lazy = false, total = refs.size)
     }
 
-    override suspend fun lazyImage(ref: SourceRef, cid: String, chapterPath: String, index: Int): ImageRef {
+    override suspend fun lazyImage(rawRef: SourceRef, cid: String, chapterPath: String, index: Int): ImageRef {
+        val ref = rawRef.asRule()
         val lazy = ref.rule.images?.lazy ?: throw SourceFailure(
             ErrorCode.RULE_INVALID, "规则未启用惰性图片", step = "lazy", pointer = "/images/lazy",
         )
@@ -219,7 +226,8 @@ class JsonRuleEngine(
         return ImageRef(url = url, lazy = true, headers = imageHeaders(ref.rule.images.headers, vars, chapterPath))
     }
 
-    override suspend fun checkUpdate(ref: SourceRef, cid: String): String? {
+    override suspend fun checkUpdate(rawRef: SourceRef, cid: String): String? {
+        val ref = rawRef.asRule()
         val spec = ref.rule.check ?: return null
         val request = spec.request ?: ref.rule.detail?.request ?: return null
         val vars = baseVars(ref) + mapOf("cid" to cid)
@@ -231,7 +239,8 @@ class JsonRuleEngine(
         return value?.trim()?.ifBlank { null }
     }
 
-    override suspend fun category(ref: SourceRef, categoryId: String, page: Int): SearchPage {
+    override suspend fun category(rawRef: SourceRef, categoryId: String, page: Int): SearchPage {
+        val ref = rawRef.asRule()
         val spec = ref.rule.category ?: throw SourceFailure(
             ErrorCode.RULE_INVALID, "规则未实现 category", step = "category", pointer = "/category",
         )
@@ -268,7 +277,7 @@ class JsonRuleEngine(
 
     // ------------------------------------------------------------------ helpers
 
-    private fun baseVars(ref: SourceRef): MutableMap<String, String> = mutableMapOf(
+    private fun baseVars(ref: RuleSourceRef): MutableMap<String, String> = mutableMapOf(
         "base" to ref.baseUrl,
         "url" to ref.baseUrl,
     )
@@ -297,7 +306,7 @@ class JsonRuleEngine(
     }
 
     private fun scriptObject(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         source: String,
         vars: Map<String, String>,
         pageUrl: String,
@@ -308,7 +317,7 @@ class JsonRuleEngine(
     }
 
     private fun scriptArray(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         source: String,
         vars: Map<String, String>,
         pageUrl: String,
@@ -317,14 +326,14 @@ class JsonRuleEngine(
         (scriptInvoke(ref, source, vars, pageUrl, response) as? JsonArray)?.toList().orEmpty()
 
     private fun scriptInvoke(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         source: String,
         vars: Map<String, String>,
         pageUrl: String,
         response: HttpResponse,
     ): JsonElement? = scripts.invoke(
         ScriptCall(
-            ruleId = ref.ruleId,
+            ruleId = ref.sourceId,
             hook = "script",
             source = source,
             vars = vars,
@@ -337,7 +346,7 @@ class JsonRuleEngine(
     )
 
     private fun searchByScript(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         source: String,
         vars: Map<String, String>,
         response: HttpResponse,
@@ -362,7 +371,7 @@ class JsonRuleEngine(
     }
 
     private fun chaptersByScript(
-        ref: SourceRef,
+        ref: RuleSourceRef,
         source: String,
         vars: Map<String, String>,
         response: HttpResponse,

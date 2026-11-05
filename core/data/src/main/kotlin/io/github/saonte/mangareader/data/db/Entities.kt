@@ -21,6 +21,7 @@ data class SourceEntity(
     @ColumnInfo(name = "rule_id") val ruleId: String,
     val title: String,
     val version: String,
+    @ColumnInfo(name = "source_kind") val sourceKind: Int = KIND_RULE,
     @ColumnInfo(name = "schema_version") val schemaVersion: Int,
     @ColumnInfo(name = "engine_min") val engineMin: Int,
     @ColumnInfo(name = "base_url") val baseUrl: String?,
@@ -38,6 +39,12 @@ data class SourceEntity(
     val sort: Int = 0,
 ) {
     companion object {
+        /** JSON 声明式规则（v1 主力格式，Rhino 脚本钩子可选）。 */
+        const val KIND_RULE = 0
+
+        /** CJS 模块源（venera 风格 `class X extends ComicSource`），需 ES2020 引擎。 */
+        const val KIND_CJS = 1
+
         const val TRUST_OFFICIAL = 0
         const val TRUST_COMMUNITY = 1
         const val TRUST_LOCAL = 2

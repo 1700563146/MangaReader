@@ -45,6 +45,20 @@ class MangaDatabaseMigrationTest {
         )
     }
 
+    @Test
+    fun migrate2To3AddsSourceKind() {
+        helper.createDatabase(TEST_DB, 2).close()
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 3, true, MIGRATION_2_3)
+        val columns = mutableListOf<String>()
+        db.query("PRAGMA table_info(`source`)").use { cursor ->
+            while (cursor.moveToNext()) columns += cursor.getString(cursor.getColumnIndexOrThrow("name"))
+        }
+        db.close()
+
+        assertThat(columns).contains("source_kind")
+    }
+
     private companion object {
         const val TEST_DB = "migration-test.db"
     }

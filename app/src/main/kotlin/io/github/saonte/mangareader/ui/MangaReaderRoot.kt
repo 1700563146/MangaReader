@@ -36,6 +36,7 @@ import io.github.saonte.mangareader.feature.browse.BrowseScreen
 import io.github.saonte.mangareader.feature.detail.DetailScreen
 import io.github.saonte.mangareader.feature.downloads.DownloadsScreen
 import io.github.saonte.mangareader.feature.local.LocalDetailScreen
+import io.github.saonte.mangareader.feature.library.SourceLibraryScreen
 import io.github.saonte.mangareader.feature.local.LocalScreen
 import io.github.saonte.mangareader.feature.history.HistoryScreen
 import io.github.saonte.mangareader.feature.reader.ReaderDemoScreen
@@ -52,6 +53,7 @@ import io.github.saonte.mangareader.navigation.DetailRoute
 import io.github.saonte.mangareader.navigation.DownloadsRoute
 import io.github.saonte.mangareader.navigation.LocalDetailRoute
 import io.github.saonte.mangareader.navigation.LocalRoute
+import io.github.saonte.mangareader.navigation.SourceLibraryRoute
 import io.github.saonte.mangareader.navigation.ReaderDemoRoute
 import io.github.saonte.mangareader.navigation.ReaderRoute
 import io.github.saonte.mangareader.navigation.RulesRoute
@@ -123,6 +125,9 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                 composable<BackupRoute> {
                     BackupScreen(onBack = { navController.popBackStack() })
                 }
+                composable<SourceLibraryRoute> {
+                    SourceLibraryScreen(onBack = { navController.popBackStack() })
+                }
                 composable<LocalRoute> {
                     LocalScreen(
                         onBack = { navController.popBackStack() },
@@ -155,6 +160,7 @@ fun MangaReaderRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                         onOpenDownloads = { navController.navigate(DownloadsRoute) },
                         onOpenLocal = { navController.navigate(LocalRoute) },
                         onOpenBackup = { navController.navigate(BackupRoute) },
+                        onOpenSourceLibrary = { navController.navigate(SourceLibraryRoute) },
                     )
                 }
                 composable<ReaderDemoRoute> {

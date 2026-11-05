@@ -45,7 +45,7 @@ interface SourceDao {
     @Query(
         """UPDATE source SET title = :title, version = :version, schema_version = :schemaVersion,
            engine_min = :engineMin, base_url = :baseUrl, json = :json, sha256 = :sha256,
-           origin_url = :originUrl, trust = :trust, last_used_at = :usedAt
+           origin_url = :originUrl, trust = :trust, last_used_at = :usedAt, source_kind = :sourceKind
            WHERE type = :type""",
     )
     suspend fun updateInstalled(
@@ -60,6 +60,7 @@ interface SourceDao {
         originUrl: String?,
         trust: Int,
         usedAt: Long?,
+        sourceKind: Int,
     )
 
     @Query("UPDATE source SET enabled = :enabled WHERE type = :type")

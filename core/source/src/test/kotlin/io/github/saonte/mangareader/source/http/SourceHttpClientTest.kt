@@ -3,7 +3,7 @@ package io.github.saonte.mangareader.source.http
 import com.google.common.truth.Truth.assertThat
 import io.github.saonte.mangareader.model.ErrorCode
 import io.github.saonte.mangareader.source.SourceFailure
-import io.github.saonte.mangareader.source.SourceRef
+import io.github.saonte.mangareader.source.RuleSourceRef
 import io.github.saonte.mangareader.source.rule.Capability
 import io.github.saonte.mangareader.source.rule.HttpSpec
 import io.github.saonte.mangareader.source.rule.RequestSpec
@@ -71,7 +71,7 @@ class SourceHttpClientTest {
     @Test
     fun `get renders template and sends headers`() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(200).setBody("ok"))
-        val ref = SourceRef(1, rule())
+        val ref = RuleSourceRef(1, rule())
         val spec = RequestSpec(
             url = "${'$'}{base}/search?q=${'$'}{keyword|urlencode}&page=${'$'}{page}",
             headers = mapOf("X-Page" to "${'$'}{page}"),
@@ -90,7 +90,7 @@ class SourceHttpClientTest {
 
     @Test
     fun `host outside whitelist is rejected before network`() = runBlocking {
-        val ref = SourceRef(1, rule(hosts = listOf("example.com")))
+        val ref = RuleSourceRef(1, rule(hosts = listOf("example.com")))
 
         val error = runCatching {
             client.execute(ref, RequestSpec(url = "${'$'}{base}/x"), emptyMap())
@@ -102,7 +102,7 @@ class SourceHttpClientTest {
 
     @Test
     fun `cleartext requires explicit opt in`() = runBlocking {
-        val ref = SourceRef(1, rule(allowCleartext = false))
+        val ref = RuleSourceRef(1, rule(allowCleartext = false))
 
         val error = runCatching {
             client.execute(ref, RequestSpec(url = "${'$'}{base}/x"), emptyMap())
@@ -116,7 +116,7 @@ class SourceHttpClientTest {
         server.enqueue(
             MockResponse().setResponseCode(302).setHeader("Location", "http://evil.example.org/x"),
         )
-        val ref = SourceRef(1, rule(hosts = listOf(hostOf(server.url("/").toString()), "example.org")))
+        val ref = RuleSourceRef(1, rule(hosts = listOf(hostOf(server.url("/").toString()), "example.org")))
 
         val error = runCatching {
             client.execute(ref, RequestSpec(url = "${'$'}{base}/x"), emptyMap())
@@ -129,7 +129,7 @@ class SourceHttpClientTest {
     fun `retryable 5xx is retried then reported`() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(500))
         server.enqueue(MockResponse().setResponseCode(500))
-        val ref = SourceRef(1, rule(retry = 1))
+        val ref = RuleSourceRef(1, rule(retry = 1))
 
         val error = runCatching {
             client.execute(ref, RequestSpec(url = "${'$'}{base}/x"), emptyMap())
@@ -147,7 +147,7 @@ class SourceHttpClientTest {
                 .setBody("one"),
         )
         server.enqueue(MockResponse().setResponseCode(200).setBody("two"))
-        val ref = SourceRef(1, rule())
+        val ref = RuleSourceRef(1, rule())
 
         client.execute(ref, RequestSpec(url = "${'$'}{base}/login"), emptyMap())
         client.execute(ref, RequestSpec(url = "${'$'}{base}/next"), emptyMap())
@@ -164,7 +164,7 @@ class SourceHttpClientTest {
                 .setHeader("Content-Type", "text/html; charset=gbk")
                 .setBody(okio.Buffer().write("中文".toByteArray(charset("GBK")))),
         )
-        val ref = SourceRef(1, rule())
+        val ref = RuleSourceRef(1, rule())
 
         val response = client.execute(ref, RequestSpec(url = "${'$'}{base}/gbk"), emptyMap())
 

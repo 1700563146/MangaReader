@@ -18,6 +18,24 @@
 
 - 明确零内置源、规则沙箱、签名与撤销机制、实名投诉通道。
 
+## [Unreleased]
+
+### Added
+
+- 源库浏览：设置 →「源库」，用户自填索引地址，拉取并逐条安装。
+- 索引解析兼容 venera 数组格式与带签名的 JSON 规则索引。
+- `SourceKind` 与 `SourceRef` 密封接口，为多引擎做准备。
+- CJS 源可导入并登记（`enabled=false`），UI 明确提示需 ES2020 引擎。
+
+### Changed
+
+- Room v2→v3：`source.source_kind` 列，附迁移测试。
+- Rhino 升级到 1.9.2（新增展开运算符、可选链、空值合并支持；仍不支持 class/async）。
+
+### Docs
+
+- 新增 ADR-007（CJS 引擎预留与实测能力边界）、M8 报告。
+
 ## [1.0.0] - 2026-11-04
 
 ### Added
